@@ -6,7 +6,7 @@ Armored Core: For Answer
 Armored Core V  
 
 [![Github Release](https://img.shields.io/github/release-pre/WarpZephyr/Cauldron)](https://github.com/WarpZephyr/Cauldron/releases/latest)
-[![Github All Releases](https://img.shields.io/github/downloads-pre/WarpZephyr/Cauldron/latest/total)](https://github.com/WarpZephyr/Cauldron/releases/latest)
+[![Github All Releases](https://img.shields.io/github/downloads/WarpZephyr/Cauldron/total)](https://github.com/WarpZephyr/Cauldron/releases/latest)
 
 ## Key Features
 - Map Editor: a visual editor for editing maps.
