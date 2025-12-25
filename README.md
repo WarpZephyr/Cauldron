@@ -15,8 +15,6 @@ Armored Core V
 - Text Editor: an editor for editing text localization.
 - Texture Viewer: a simple to use viewer for looking and extracting textures.
 
-You no longer need to unpack a game for any of the editors.
-
 ## Links
 Cauldron is a fork of the [Smithbox repository](https://github.com/vawser/Smithbox)
 
