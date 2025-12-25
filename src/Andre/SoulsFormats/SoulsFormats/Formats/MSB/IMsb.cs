@@ -29,7 +29,29 @@ namespace SoulsFormats
         IMsbParam<IMsbPart> Parts { get; }
     }
 
-	/// <summary>
+    /// <summary>
+    /// Maps with routes.
+    /// </summary>
+    public interface IMsbRouted : IMsb
+    {
+        /// <summary>
+        /// Routes between two points.
+        /// </summary>
+        IMsbParam<IMsbRoute> Routes { get; }
+    }
+
+    /// <summary>
+    /// Maps with layers.
+    /// </summary>
+    public interface IMsbLayered : IMsb
+    {
+        /// <summary>
+        /// Layers which parts can selectively be enabled or disabled on.
+        /// </summary>
+        IMsbParam<IMsbLayer> Layers { get; }
+    }
+
+    /// <summary>
     /// A generic map layout file with a number of tree bounding volume hierarchies.
     /// </summary>
     public interface IMsbBound<TTree> : IMsb where TTree : IMsbTree
@@ -158,7 +180,44 @@ namespace SoulsFormats
         IMsbPart DeepCopy();
     }
 
-	/// <summary>
+    /// <summary>
+    /// A layer that parts can selectively be enabled or disabled on.
+    /// </summary>
+    public interface IMsbLayer : IMsbEntry
+    {
+        /// <summary>
+        /// The ID used to identify this layer.
+        /// </summary>
+        public int LayerID { get; set; }
+
+        /// <summary>
+        /// Creates a deep copy of the layer.
+        /// </summary>
+        IMsbLayer DeepCopy();
+    }
+
+    /// <summary>
+    /// A route between two points.
+    /// </summary>
+    public interface IMsbRoute : IMsbEntry
+    {
+        /// <summary>
+        /// Identifies the start point of the route.
+        /// </summary>
+        public int StartPointID { get; set; }
+
+        /// <summary>
+        /// Identifies the target point of the route.
+        /// </summary>
+        public int GoalPointID { get; set; }
+
+        /// <summary>
+        /// Creates a deep copy of the route.
+        /// </summary>
+        IMsbRoute DeepCopy();
+    }
+
+    /// <summary>
     /// A tree hierarchy of axis-aligned bounding boxes used in various calculations such as drawing, culling, and collision detection.
     /// </summary>
     public interface IMsbTree

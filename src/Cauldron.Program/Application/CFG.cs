@@ -1421,6 +1421,7 @@ public class CFG
     public bool Toolbar_Move_to_Grid_Specific_Height_Input = false;
 
     public bool Toolbar_Create_Light = false;
+    public bool Toolbar_Create_Model = false;
     public bool Toolbar_Create_Part = true;
     public bool Toolbar_Create_Region = false;
     public bool Toolbar_Create_Event = false;

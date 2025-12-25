@@ -48,36 +48,32 @@ public class MapEntityTypeCache
         }
 
         // Build the groupings from each top type
-        Dictionary<MsbEntityType, Dictionary<Type, List<MsbEntity>>> mapcache = new();
-
-        // Internal Types
-        mapcache.Add(MsbEntityType.Part, new Dictionary<Type, List<MsbEntity>>());
-
-        mapcache.Add(MsbEntityType.Region, new Dictionary<Type, List<MsbEntity>>());
-
-        mapcache.Add(MsbEntityType.Event, new Dictionary<Type, List<MsbEntity>>());
-
-        /*
-        // Routes
-        if (Cauldron.ProjectType is ProjectType.DS2 
-            or ProjectType.DS2S
-            or ProjectType.DS3
-            or ProjectType.SDT
-            or ProjectType.ER
-            or ProjectType.AC6)
+        Dictionary<MsbEntityType, Dictionary<Type, List<MsbEntity>>> mapcache = new()
         {
-            mapcache.Add(MsbEntityType.Routes, new Dictionary<Type, List<MsbEntity>>());
+            // Internal Types
+            { MsbEntityType.Model, new Dictionary<Type, List<MsbEntity>>() },
+            { MsbEntityType.Part, new Dictionary<Type, List<MsbEntity>>() },
+            { MsbEntityType.Region, new Dictionary<Type, List<MsbEntity>>() },
+            { MsbEntityType.Event, new Dictionary<Type, List<MsbEntity>>() }
+        };
+
+        // Routes
+        if (Editor.Project.ProjectType is ProjectType.AC4
+            or ProjectType.ACFA
+            or ProjectType.ACV
+            or ProjectType.ACVD)
+        {
+            mapcache.Add(MsbEntityType.Route, new Dictionary<Type, List<MsbEntity>>());
         }
 
         // Layers
-        if (Cauldron.ProjectType is ProjectType.DS2
-            or ProjectType.DS2S
-            or ProjectType.DS3
-            or ProjectType.AC6)
+        if (Editor.Project.ProjectType is ProjectType.AC4
+            or ProjectType.ACFA
+            or ProjectType.ACV
+            or ProjectType.ACVD)
         {
-            mapcache.Add(MsbEntityType.Layers, new Dictionary<Type, List<MsbEntity>>());
+            mapcache.Add(MsbEntityType.Layer, new Dictionary<Type, List<MsbEntity>>());
         }
-        */
 
         // External: BTL
         if (Editor.Project.ProjectType is ProjectType.BB

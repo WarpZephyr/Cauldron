@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace StudioCore.Editors.MapEditor;
+﻿namespace StudioCore.Editors.MapEditor;
 
 public enum MsbEntityType
 {
@@ -9,9 +7,9 @@ public enum MsbEntityType
     Part,
     Region,
     Event,
-    Models,
-    Routes,
-    Layers,
+    Model,
+    Route,
+    Layer,
     Light,
     DS2Generator,
     DS2GeneratorRegist,

@@ -25,7 +25,7 @@ namespace SoulsFormats
         /// <summary>
         /// Routes between two points.
         /// </summary>
-        public class RouteParam : Param<Route>
+        public class RouteParam : Param<Route>, IMsbParam<IMsbRoute>
         {
             /// <summary>
             /// The existing default routes.
@@ -64,11 +64,13 @@ namespace SoulsFormats
                 }
                 return route;
             }
+            IMsbRoute IMsbParam<IMsbRoute>.Add(IMsbRoute item) => Add((Route)item);
 
             /// <summary>
             /// Returns every <see cref="Route"/> in the order they'll be written.
             /// </summary>
             public override List<Route> GetEntries() => SFUtil.ConcatAll<Route>(DefaultRoutes, AIRoutes);
+            IReadOnlyList<IMsbRoute> IMsbParam<IMsbRoute>.GetEntries() => GetEntries();
 
             internal override Route ReadEntry(BinaryReaderEx br)
             {
@@ -88,7 +90,7 @@ namespace SoulsFormats
         /// <summary>
         /// A route between two points.
         /// </summary>
-        public abstract class Route : ParamEntry
+        public abstract class Route : ParamEntry, IMsbRoute
         {
             /// <summary>
             /// Identifies the start point of the route.
@@ -159,6 +161,15 @@ namespace SoulsFormats
                 bw.WriteShiftJIS(MSB.ReambiguateName(Name), true);
                 bw.Pad(4);
             }
+
+            /// <summary>
+            /// Creates a deep copy of the route.
+            /// </summary>
+            public Route DeepCopy()
+            {
+                return (Route)MemberwiseClone();
+            }
+            IMsbRoute IMsbRoute.DeepCopy() => DeepCopy();
 
             #region RouteTypes
 

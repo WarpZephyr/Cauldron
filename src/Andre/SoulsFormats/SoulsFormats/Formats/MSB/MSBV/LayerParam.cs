@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace SoulsFormats
 {
@@ -8,7 +7,7 @@ namespace SoulsFormats
         /// <summary>
         /// Layers which parts can selectively be enabled or disabled on.
         /// </summary>
-        public class LayerParam : Param<Layer>
+        public class LayerParam : Param<Layer>, IMsbParam<IMsbLayer>
         {
             /// <summary>
             /// The available layers to use.
@@ -23,7 +22,21 @@ namespace SoulsFormats
                 Layers = new List<Layer>();
             }
 
+            /// <summary>
+            /// Adds a Layer.
+            /// </summary>
+            public Layer Add(Layer layer)
+            {
+                Layers.Add(layer);
+                return layer;
+            }
+            IMsbLayer IMsbParam<IMsbLayer>.Add(IMsbLayer item) => Add((Layer)item);
+
+            /// <summary>
+            /// Returns every Layer in the order they will be written.
+            /// </summary>
             public override List<Layer> GetEntries() => Layers;
+            IReadOnlyList<IMsbLayer> IMsbParam<IMsbLayer>.GetEntries() => GetEntries();
 
             internal override Layer ReadEntry(BinaryReaderEx br)
             {
@@ -34,7 +47,7 @@ namespace SoulsFormats
         /// <summary>
         /// A layer that parts can selectively be enabled or disabled on.
         /// </summary>
-        public class Layer : ParamEntry
+        public class Layer : ParamEntry, IMsbLayer
         {
             /// <summary>
             /// The ID of this layer to identify it.
@@ -148,6 +161,15 @@ namespace SoulsFormats
                 bw.WriteShiftJIS(MSB.ReambiguateName(Name), true);
                 bw.Pad(4);
             }
+
+            /// <summary>
+            /// Creates a deep copy of the layer.
+            /// </summary>
+            public Layer DeepCopy()
+            {
+                return (Layer)MemberwiseClone();
+            }
+            IMsbLayer IMsbLayer.DeepCopy() => DeepCopy();
         }
     }
 }

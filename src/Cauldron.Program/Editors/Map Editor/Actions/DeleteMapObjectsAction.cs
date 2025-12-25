@@ -53,6 +53,11 @@ public class DeleteMapObjectsAction : ViewportAction
                 {
                     RemoveParentIndex.Add(-1);
                 }
+
+                foreach (var robj in obj.GetReferencingObjects())
+                {
+                    robj.BuildReferenceMap();
+                }
             }
             else
             {

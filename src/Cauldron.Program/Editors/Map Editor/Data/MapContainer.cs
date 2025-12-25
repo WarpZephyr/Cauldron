@@ -120,7 +120,10 @@ public class MapContainer : ObjectContainer
     {
         foreach (IMsbModel m in msb.Models.GetEntries())
         {
-            LoadedModels.Add(m.Name, m);
+            var n = new MsbEntity(Editor, this, m, MsbEntityType.Model);
+            Models.Add(n);
+            Objects.Add(n);
+            RootObject.AddChild(n);
         }
 
         foreach (IMsbPart p in msb.Parts.GetEntries())
@@ -174,6 +177,28 @@ public class MapContainer : ObjectContainer
 
             Objects.Add(n);
             RootObject.AddChild(n);
+        }
+
+        if (msb is IMsbRouted msbRouted)
+        {
+            foreach (IMsbRoute p in msbRouted.Routes.GetEntries())
+            {
+                var n = new MsbEntity(Editor, this, p, MsbEntityType.Route);
+                Routes.Add(n);
+                Objects.Add(n);
+                RootObject.AddChild(n);
+            }
+        }
+
+        if (msb is IMsbLayered msbLayered)
+        {
+            foreach (IMsbLayer p in msbLayered.Layers.GetEntries())
+            {
+                var n = new MsbEntity(Editor, this, p, MsbEntityType.Layer);
+                Layers.Add(n);
+                Objects.Add(n);
+                RootObject.AddChild(n);
+            }
         }
 
         foreach (Entity m in Objects)
@@ -409,6 +434,72 @@ public class MapContainer : ObjectContainer
 
     public IMsbModel GetModel(string name) {
         return LoadedModels[name];
+    }
+
+    public MsbEntity CreateModel(string name)
+    {
+        if (Editor.Project.ProjectType is ProjectType.ACVD)
+        {
+            var model = CreateModelACVD(name);
+            if (model != null)
+            {
+                var n = new MsbEntity(Editor, this, (IMsbModel)model, MsbEntityType.Model);
+                Objects.Add(n);
+                RootObject.AddChild(n);
+                n.BuildReferenceMap();
+
+                // Add map-level references after all others
+                RootObject.BuildReferenceMap();
+                Editor.EntityTypeCache.InvalidateCache();
+                return n;
+            }
+        }
+
+        return null;
+    }
+
+    private static MSBVD.Model CreateModelACVD(string name)
+    {
+        MSBVD.Model model;
+
+        if (name.StartsWith("m", StringComparison.CurrentCultureIgnoreCase))
+        {
+            model = new MSBVD.Model.MapPiece
+            {
+                Name = name,
+                ResourcePath = $@"N:\ACV2\data\model\map\{name}\model_sib\{name}.sib"
+            };
+        }
+        else if (name.StartsWith("o", StringComparison.CurrentCultureIgnoreCase))
+        {
+            model = new MSBVD.Model.Object
+            {
+                Name = name,
+                ResourcePath = $@"N:\ACV2\data\model\obj\{name}\model_sib\{name}.sib"
+            };
+        }
+        else if (name.StartsWith("e", StringComparison.CurrentCultureIgnoreCase))
+        {
+            model = new MSBVD.Model.Enemy
+            {
+                Name = name,
+                ResourcePath = $@"N:\ACV2\data\model\ene\{name}\model_sib\{name}.sib"
+            };
+        }
+        else if (name.StartsWith("a", StringComparison.CurrentCultureIgnoreCase))
+        {
+            model = new MSBVD.Model.Dummy
+            {
+                Name = name,
+                ResourcePath = $@"N:\ACV2\data\model\dummy\dummy_ac\{name}.ap2"
+            };
+        }
+        else
+        {
+            model = null;
+        }
+
+        return model;
     }
 
     private void AddModelDeS(IMsb m, MSBD.Model model, string name)
@@ -725,33 +816,16 @@ public class MapContainer : ObjectContainer
         m.Models.Add(model);
     }
 
-    private void AddModelACVD(IMsb m, MSBVD.Model model, string name)
+    private void AddModel(IMsb m, string name)
     {
-        if (LoadedModels[name] != null)
+        if (Editor.Project.ProjectType is ProjectType.ACVD)
         {
-            m.Models.Add(LoadedModels[name]);
-            return;
+            var model = CreateModelACVD(name);
+            if (model != null)
+            {
+                m.Models.Add(model);
+            }
         }
-
-        model.Name = name;
-        if (model is MSBVD.Model.MapPiece)
-        {
-            model.ResourcePath = $@"N:\ACV2\data\model\map\{name}\model_sib\{name}.sib";
-        }
-        else if (model is MSBVD.Model.Object)
-        {
-            model.ResourcePath = $@"N:\ACV2\data\model\obj\{name}\model_sib\{name}.sib";
-        }
-        else if (model is MSBVD.Model.Enemy)
-        {
-            model.ResourcePath = $@"N:\ACV2\data\model\ene\{name}\model_sib\{name}.sib";
-        }
-        else if (model is MSBVD.Model.Dummy)
-        {
-            model.ResourcePath = $@"N:\ACV2\data\model\dummy\dummy_ac\{name}.ap2";
-        }
-
-        m.Models.Add(model);
     }
 
     private void AddModelAC6(IMsb m, MSB_AC6.Model model, string name)
@@ -1089,33 +1163,7 @@ public class MapContainer : ObjectContainer
 
     private void AddModelsACVD(IMsb msb)
     {
-        foreach (KeyValuePair<string, IMsbModel> mk in LoadedModels.OrderBy(q => q.Key))
-        {
-            var m = mk.Key;
-            if (m.StartsWith("m", StringComparison.CurrentCultureIgnoreCase))
-            {
-                AddModelACVD(msb, new MSBVD.Model.MapPiece { Name = m }, m);
-                continue;
-            }
-
-            if (m.StartsWith("o", StringComparison.CurrentCultureIgnoreCase))
-            {
-                AddModelACVD(msb, new MSBVD.Model.Object { Name = m }, m);
-                continue;
-            }
-
-            if (m.StartsWith("e", StringComparison.CurrentCultureIgnoreCase))
-            {
-                AddModelACVD(msb, new MSBVD.Model.Enemy { Name = m }, m);
-                continue;
-            }
-
-            if (m.StartsWith("a", StringComparison.CurrentCultureIgnoreCase))
-            {
-                AddModelACVD(msb, new MSBVD.Model.Dummy { Name = m }, m);
-                continue;
-            }
-        }
+        
     }
 
     private void AddModelsAC6(IMsb msb)
@@ -1153,12 +1201,16 @@ public class MapContainer : ObjectContainer
     {
         foreach (Entity m in Objects)
         {
-            if (m.WrappedObject != null && m.WrappedObject is IMsbPart p)
+            if (m.WrappedObject != null && m.WrappedObject is IMsbModel mo)
+            {
+                msb.Models.Add(mo);
+            }
+            else if (m.WrappedObject != null && m.WrappedObject is IMsbPart p)
             {
                 msb.Parts.Add(p);
-                if (p.ModelName != null && !LoadedModels.ContainsKey(p.ModelName))
+                if (m.GetReferencingObjects().Where(e => e is MsbEntity me && me.Type == MsbEntityType.Model && me.Name == p.ModelName).FirstOrDefault() == null)
                 {
-                    LoadedModels.Add(p.ModelName, null);
+                    AddModel(msb, Name);
                 }
             }
             else if (m.WrappedObject != null && m.WrappedObject is IMsbRegion r)
@@ -1169,55 +1221,14 @@ public class MapContainer : ObjectContainer
             {
                 msb.Events.Add(e);
             }
-        }
-
-        if (game == ProjectType.DES)
-        {
-            AddModelsDeS(msb);
-        }
-        else if (game == ProjectType.DS1 || game == ProjectType.DS1R)
-        {
-            AddModelsDS1(msb);
-        }
-        else if (game == ProjectType.DS2 || game == ProjectType.DS2S)
-        {
-            AddModelsDS2(msb);
-        }
-        else if (game == ProjectType.BB)
-        {
-            AddModelsBB(msb);
-        }
-        else if (game == ProjectType.DS3)
-        {
-            AddModelsDS3(msb);
-        }
-        else if (game == ProjectType.SDT)
-        {
-            AddModelsSekiro(msb);
-        }
-        else if (game == ProjectType.ER)
-        {
-            AddModelsER(msb);
-        }
-        else if (game == ProjectType.NR)
-        {
-            AddModelsNR(msb);
-        }
-        else if (game == ProjectType.ACFA)
-        {
-            AddModelsACFA(msb);
-        }
-        else if (game == ProjectType.ACV)
-        {
-            AddModelsACV(msb);
-        }
-        else if (game == ProjectType.ACVD)
-        {
-            AddModelsACVD(msb);
-        }
-        else if (game == ProjectType.AC6)
-        {
-            AddModelsAC6(msb);
+            else if (msb is IMsbRouted msbRouted && m.WrappedObject != null && m.WrappedObject is IMsbRoute ro)
+            {
+                msbRouted.Routes.Add(ro);
+            }
+            else if (msb is IMsbLayered msbLayered && m.WrappedObject != null && m.WrappedObject is IMsbLayer l)
+            {
+                msbLayered.Layers.Add(l);
+            }
         }
     }
 

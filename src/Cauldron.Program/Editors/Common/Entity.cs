@@ -1366,6 +1366,9 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Part.Enemy ||
             WrappedObject is MSBE.Part.Enemy ||
             WrappedObject is MSBS.Part.Enemy ||
+            WrappedObject is MSBFA.Part.Enemy ||
+            WrappedObject is MSBV.Part.Enemy ||
+            WrappedObject is MSBVD.Part.Enemy ||
             WrappedObject is MSB_AC6.Part.Enemy ||
             WrappedObject is MSB_NR.Part.Enemy ? true : false;
     }
@@ -1396,6 +1399,11 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Part.Object ||
             WrappedObject is MSBE.Part.Asset ||
             WrappedObject is MSBS.Part.Object ||
+            WrappedObject is MSBFA.Part.Object ||
+            WrappedObject is MSBV.Part.Object ||
+            WrappedObject is MSBV.Part.ExternalObject ||
+            WrappedObject is MSBVD.Part.Object ||
+            WrappedObject is MSBVD.Part.ExternalObject ||
             WrappedObject is MSB_AC6.Part.Asset ||
             WrappedObject is MSB_NR.Part.Asset ? true : false;
     }
@@ -1421,6 +1429,9 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Part.DummyObject ||
             WrappedObject is MSBE.Part.DummyAsset ||
             WrappedObject is MSBS.Part.DummyObject ||
+            WrappedObject is MSBFA.Part.Unused ||
+            WrappedObject is MSBV.Part.Unused ||
+            WrappedObject is MSBVD.Part.Unused ||
             WrappedObject is MSB_AC6.Part.DummyAsset ||
             WrappedObject is MSB_NR.Part.DummyAsset ? true : false;
     }
@@ -1436,6 +1447,9 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Part.MapPiece ||
             WrappedObject is MSBE.Part.MapPiece ||
             WrappedObject is MSBS.Part.MapPiece ||
+            WrappedObject is MSBFA.Part.MapPiece ||
+            WrappedObject is MSBV.Part.MapPiece ||
+            WrappedObject is MSBVD.Part.MapPiece ||
             WrappedObject is MSB_AC6.Part.MapPiece ||
             WrappedObject is MSB_NR.Part.MapPiece ? true : false;
     }
@@ -2037,6 +2051,11 @@ public class MsbEntity : Entity
                         if (_renderSceneMesh != null)
                         {
                             _renderSceneMesh.Dispose();
+                        }
+
+                        if (GetReferencingObjects().Where(e => e is MsbEntity me && me.Type == MsbEntityType.Model && me.Name == model).FirstOrDefault() == null)
+                        {
+                            ContainingMap.CreateModel(model);
                         }
 
                         CurrentModelName = model;

@@ -8,7 +8,7 @@ namespace SoulsFormats
     /// A map layout file used in Armored Core V.<br/>
     /// Extension: .msb
     /// </summary>
-    public partial class MSBFA : SoulsFile<MSBFA>, IMsbBound<MSBFA.MapStudioTree>
+    public partial class MSBFA : SoulsFile<MSBFA>, IMsbRouted, IMsbLayered, IMsbBound<MSBFA.MapStudioTree>
     {
         /// <summary>
         /// Model files that are available for parts to use.
@@ -32,11 +32,13 @@ namespace SoulsFormats
         /// Routes between two points.
         /// </summary>
         public RouteParam Routes { get; set; }
+        IMsbParam<IMsbRoute> IMsbRouted.Routes => Routes;
 
         /// <summary>
         /// Layers which parts can selectively be enabled or disabled on.
         /// </summary>
         public LayerParam Layers { get; set; }
+        IMsbParam<IMsbLayer> IMsbLayered.Layers => Layers;
 
         /// <summary>
         /// Instances of actual things in the map.

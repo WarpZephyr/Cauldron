@@ -138,6 +138,7 @@ namespace SoulsFormats
             /// <summary>
             /// The name of the model used by this part without folder or extension.
             /// </summary>
+            [MSBReference(ReferenceType = typeof(Model))]
             public string ModelName { get; set; }
 
             /// <summary>

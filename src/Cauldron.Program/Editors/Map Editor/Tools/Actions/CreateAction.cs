@@ -17,10 +17,12 @@ public class CreateAction
     public (string, ObjectContainer) TargetMap = ("None", null);
     public (string, Entity) TargetBTL = ("None", null);
 
+    public List<(string, Type)> ModelClasses = new();
     public List<(string, Type)> EventClasses = new();
     public List<(string, Type)> PartsClasses = new();
     public List<(string, Type)> RegionClasses = new();
 
+    public Type CreateModelSelectedType;
     public Type CreatePartSelectedType;
     public Type CreateRegionSelectedType;
     public Type CreateEventSelectedType;
@@ -127,11 +129,21 @@ public class CreateAction
                     UIHelper.Tooltip("Create a BTL Light object.");
                 }
 
+                if (ImGui.Checkbox("Model", ref CFG.Current.Toolbar_Create_Model))
+                {
+                    CFG.Current.Toolbar_Create_Light = false;
+                    CFG.Current.Toolbar_Create_Region = false;
+                    CFG.Current.Toolbar_Create_Event = false;
+                    CFG.Current.Toolbar_Create_Part = false;
+                }
+                UIHelper.Tooltip("Create a Model object.");
+
                 if (ImGui.Checkbox("Part", ref CFG.Current.Toolbar_Create_Part))
                 {
                     CFG.Current.Toolbar_Create_Light = false;
                     CFG.Current.Toolbar_Create_Region = false;
                     CFG.Current.Toolbar_Create_Event = false;
+                    CFG.Current.Toolbar_Create_Model = false;
                 }
                 UIHelper.Tooltip("Create a Part object.");
 
@@ -140,6 +152,7 @@ public class CreateAction
                     CFG.Current.Toolbar_Create_Light = false;
                     CFG.Current.Toolbar_Create_Part = false;
                     CFG.Current.Toolbar_Create_Event = false;
+                    CFG.Current.Toolbar_Create_Model = false;
                 }
                 UIHelper.Tooltip("Create a Region object.");
 
@@ -148,6 +161,7 @@ public class CreateAction
                     CFG.Current.Toolbar_Create_Light = false;
                     CFG.Current.Toolbar_Create_Region = false;
                     CFG.Current.Toolbar_Create_Part = false;
+                    CFG.Current.Toolbar_Create_Model = false;
                 }
                 UIHelper.Tooltip("Create an Event object.");
                 UIHelper.WrappedText("");
@@ -163,6 +177,23 @@ public class CreateAction
                 if (CFG.Current.Toolbar_Create_Light)
                 {
                     // Nothing
+                }
+
+                if (CFG.Current.Toolbar_Create_Model)
+                {
+                    UIHelper.SimpleHeader("Model Type", "Model Type", "", UI.Current.ImGui_Default_Text_Color);
+
+                    ImGui.BeginChild("msb_model_selection", sectionSize, ImGuiChildFlags.Borders);
+
+                    foreach ((string, Type) p in ModelClasses)
+                    {
+                        if (ImGui.RadioButton(p.Item1, p.Item2 == CreateModelSelectedType))
+                        {
+                            CreateModelSelectedType = p.Item2;
+                        }
+                    }
+
+                    ImGui.EndChild();
                 }
 
                 if (CFG.Current.Toolbar_Create_Part)
@@ -246,6 +277,13 @@ public class CreateAction
                     AddNewEntity(typeof(BTL.Light), MsbEntityType.Light, map, btl);
                 }
             }
+            if (CFG.Current.Toolbar_Create_Model)
+            {
+                if (CreateModelSelectedType == null)
+                    return;
+
+                AddNewEntity(CreateModelSelectedType, MsbEntityType.Model, map);
+            }
             if (CFG.Current.Toolbar_Create_Part)
             {
                 if (CreatePartSelectedType == null)
@@ -326,6 +364,15 @@ public class CreateAction
                 break;
             default:
                 throw new ArgumentException("type must be valid");
+        }
+
+        Type modelType = msbclass.GetNestedType("Model");
+        List<Type> modelSubclasses = msbclass.Assembly.GetTypes()
+            .Where(type => type.IsSubclassOf(modelType) && !type.IsAbstract).ToList();
+        ModelClasses = modelSubclasses.Select(x => (x.Name, x)).ToList();
+        if (ModelClasses.Count == 0)
+        {
+            ModelClasses.Add(("Model", modelType));
         }
 
         Type partType = msbclass.GetNestedType("Part");
