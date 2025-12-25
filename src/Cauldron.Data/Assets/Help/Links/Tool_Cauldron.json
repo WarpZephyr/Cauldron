@@ -1,0 +1,15 @@
+{
+    "ProjectType": 0,
+	"HeaderColor": [ 0.0, 1.0, 0.0, 1.0 ],
+	"HighlightColor": [ 0.871, 0.843, 0.351, 1.0 ],
+	"Title": "Tool: Cauldron",
+    "Tags": [
+        ""
+    ],
+    "Contents": [
+        "[Header]Link",
+        "[Link@https:/github.com/warpzephyr/Cauldron@Cauldron]",
+        "[Header]Description",
+        "Cauldron is a modding tool for Armored Core 4, Armored Core: For Answer, Armored Core V, and Armored Core: Verdict Day."
+    ]
+}

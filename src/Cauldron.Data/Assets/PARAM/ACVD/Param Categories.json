@@ -1,0 +1,203 @@
+{
+  "Categories": [
+    {
+      "DisplayName": "AC Control",
+      "Params": [
+        "acactrestrictionparam"
+      ]
+    },
+    {
+      "DisplayName": "AC Animation",
+      "Params": [
+        "acmotion",
+        "acanimhokan",
+        "armweaponaiminfo",
+        "armaimcollate",
+        "motioncollate"
+      ]
+    },
+    {
+      "DisplayName": "Sfx",
+      "Params": [
+        "groundsfxparam",
+        "groundsfxparam1",
+        "groundsfxparam2",
+        "groundsfxparam3",
+        "mapsfxparam",
+        "sfxlimitparam"
+      ]
+    },
+    {
+      "DisplayName": "Sound",
+      "Params": [
+        "acsoundparam",
+        "groundsoundparam"
+      ]
+    },
+    {
+      "DisplayName": "Battle Map Data",
+      "Params": [
+        "battlemapinfo"
+      ]
+    },
+    {
+      "DisplayName": "Assembly Screen Layout",
+      "Params": [
+        "acsisdisplay"
+      ]
+    },
+    {
+      "DisplayName": "Destruction",
+      "Params": [
+        "destroyap",
+        "destroyparam"
+      ]
+    },
+    {
+      "DisplayName": "Object",
+      "Params": [
+        "acobjectparam"
+      ]
+    },
+    {
+      "DisplayName": "Mission Data",
+      "Params": [
+        "missionestimate2normal",
+        "missionestimate2hard"
+      ]
+    },
+    {
+      "DisplayName": "Custom Map",
+      "Params": [
+        "customlayoutenemyparam"
+      ]
+    },
+    {
+      "DisplayName": "Npc",
+      "Params": [
+        "npcacparam",
+        "npccorpsparam"
+      ]
+    },
+    {
+      "DisplayName": "Medal",
+      "Params": [
+        "medalparam",
+        "teammedalparam"
+      ]
+    },
+    {
+      "DisplayName": "AI Growth",
+      "Params": [
+        "aigrowparam",
+        "aigrowweapon",
+        "aiextendexptable"
+      ]
+    },
+    {
+      "DisplayName": "AI Resource",
+      "Params": [
+        "acaiparam",
+        "acpathcostcalcparam",
+        "aiacweaponchipparameter",
+        "aicommonparam",
+        "atkpathcostcalcparam",
+        "escapepathcostcalcparam"
+      ]
+    },
+    {
+      "DisplayName": "Part Growth",
+      "Params": [
+        "growpartsbladeparam",
+        "growpartsbulletparam",
+        "growpartsarmunitparam",
+        "growpartspatternparam"
+      ]
+    },
+    {
+      "DisplayName": "Bullet",
+      "Params": [
+        "bulletarise",
+        "bulletblade",
+        "bulletdecoy",
+        "bulletecm",
+        "bulletenergy",
+        "bulletexplosion",
+        "bulletglue",
+        "bulletkojimazone",
+        "bulletmissile",
+        "bulletrecon",
+        "bulletrigid",
+        "bulletstatuserror"
+      ]
+    },
+    {
+      "DisplayName": "Bullet Sfx",
+      "Params": [
+        "acweaponsfxparam",
+        "enemyweaponsfxparam",
+        "bullethitsfxparam"
+      ]
+    },
+    {
+      "DisplayName": "Bullet Sound",
+      "Params": [
+        "acweaponsoundparam",
+        "enemyweaponsoundparam",
+        "bullethitseparam"
+      ]
+    },
+    {
+      "DisplayName": "Enemy",
+      "Params": [
+        "enemybasicparam",
+        "enemycommon",
+        "enemygraphicsparam",
+        "enemyheribehaviorparam",
+        "enemymechbehaviorparam",
+        "enemyperformanceparam",
+        "enemyweapon",
+        "noaibatterybehaviorparam",
+        "noaisquidbehaviorparam"
+      ]
+    },
+    {
+      "DisplayName": "Enemy Bullet",
+      "Params": [
+        "bulletlaunchenemy",
+        "enemybulletblade",
+        "enemybulletecm",
+        "enemybulletenergy",
+        "enemybulletexplosion",
+        "enemybulletglue",
+        "enemybulletmissile",
+        "enemybulletrigid",
+        "enemybulletstatuserror"
+      ]
+    },
+    {
+      "DisplayName": "Draw General",
+      "Params": [
+        "selfillumeparam",
+        "movieplayinfo",
+        "autoblinkparam"
+      ]
+    },
+    {
+      "DisplayName": "Filter",
+      "Params": [
+        "zoomblurparam",
+        "postarization",
+        "camerablurparam",
+        "contrastparam",
+        "oldfilmparam",
+        "shakednoizefilterparam",
+        "raindropwaterparam",
+        "dofparam",
+        "tvfilterparam",
+        "highdofparam",
+        "linenoiseparam"
+      ]
+    }
+  ]
+}
