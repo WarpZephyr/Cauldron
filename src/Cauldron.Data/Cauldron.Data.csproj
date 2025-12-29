@@ -35,6 +35,10 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Assets\Archive Keys\" />
+  </ItemGroup>
+
   <PropertyGroup Condition="$(Configuration.StartsWith('Debug'))">
     <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>

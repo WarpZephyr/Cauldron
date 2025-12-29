@@ -45,9 +45,7 @@ public class ResourceLocator
                 if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2)
                 {
                     var mid = p[i];
-
                     i++;
-
                     var id = p[i];
 
                     if (id == "tex")
@@ -55,12 +53,21 @@ public class ResourceLocator
                         relPath = Path.Combine("model", "map", $"t{mid.Substring(1)}.tpfbhd");
                     }
                 }
+                else if (project.ProjectType is ProjectType.ACFA)
+                {
+                    var mid = p[i];
+                    i++;
+                    var id = p[i];
+
+                    if (id == "tex")
+                    {
+                        relPath = Path.Combine("model", "map", mid, $"{mid}_t.bnd");
+                    }
+                }
                 else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
                 {
                     var mid = p[i];
-
                     i++;
-
                     var id = p[i];
 
                     if (id == "tex")
@@ -75,7 +82,6 @@ public class ResourceLocator
 
                     relPath = Path.Combine("map", mid, $"{mid}_{p[i]}.tpf.dcx");
                 }
-                
                 else
                 {
                     var mid = p[i];
@@ -107,6 +113,10 @@ public class ResourceLocator
                     else if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2)
                     {
                         relPath = Path.Combine("model", "map", $"{mapid}.mapbhd");
+                    }
+                    else if (project.ProjectType is ProjectType.ACFA)
+                    {
+                        relPath = Path.Combine("model", "map", mapid, $"{mapid}_m.bnd");
                     }
                     else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
                     {
@@ -221,6 +231,10 @@ public class ResourceLocator
                 {
                     relPath = Path.Combine("model", "chr", $"{chrid}.bnd");
                 }
+                else if (project.ProjectType is ProjectType.ACFA)
+                {
+                    relPath = Path.Combine("model", "ene", chrid, $"{chrid}_m.bnd");
+                }
                 else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
                 {
                     relPath = Path.Combine("model", "ene", chrid, $"{chrid}_m.bnd.dcx");
@@ -265,6 +279,10 @@ public class ResourceLocator
                 else if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2)
                 {
                     relPath = Path.Combine("model", "chr", $"{chrid}.texbnd");
+                }
+                else if (project.ProjectType is ProjectType.ACFA)
+                {
+                    relPath = Path.Combine("model", "ene", chrid, $"{chrid}_t.bnd");
                 }
                 else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
                 {
@@ -319,6 +337,17 @@ public class ResourceLocator
                 else if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2)
                 {
                     relPath = Path.Combine("model", "obj", $"{objid}.bnd");
+                }
+                else if (project.ProjectType is ProjectType.ACFA)
+                {
+                    if (p[i].Equals("model"))
+                    {
+                        relPath = Path.Combine("model", "obj", objid, $"{objid}_m.bnd");
+                    }
+                    else
+                    {
+                        relPath = Path.Combine("model", "obj", objid, $"{objid}_t.bnd");
+                    }
                 }
                 else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
                 {
@@ -760,9 +789,13 @@ public class ResourceLocator
         ad.AssetVirtualPath = null;
         ad.AssetArchiveVirtualPath = null;
 
-        if (project.ProjectType is ProjectType.DES or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+        if (project.ProjectType is ProjectType.DES or ProjectType.ACV or ProjectType.ACVD)
         {
             ad.AssetVirtualPath = $@"chr/{id}/tex";
+        }
+        else if (project.ProjectType is ProjectType.ACFA)
+        {
+            ad.AssetArchiveVirtualPath = $@"chr/{id}/tex";
         }
         else if (project.ProjectType is ProjectType.DS1 or ProjectType.DS1R or ProjectType.BB)
         {

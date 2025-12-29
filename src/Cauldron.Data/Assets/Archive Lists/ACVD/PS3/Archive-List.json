@@ -1,0 +1,20 @@
+{
+    "Entries": [
+        {
+            "Name": "dvdbnd5_layer0",
+            "IsEncrypted":  false,
+            "Header": {
+                "Path": "/bind/dvdbnd5_layer0.bhd",
+                "Folder": "/bind/",
+                "Filename": "dvdbnd5_layer0",
+                "Extension": "bhd"
+            },
+            "Data": {
+                "Path": "/bind/dvdbnd_layer0.bdt",
+                "Folder": "/bind/",
+                "Filename": "dvdbnd_layer0",
+                "Extension": "bdt"
+            }
+        }
+    ]
+}

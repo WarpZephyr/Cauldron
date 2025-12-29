@@ -2053,7 +2053,7 @@ public class MsbEntity : Entity
                             _renderSceneMesh.Dispose();
                         }
 
-                        if (GetReferencingObjects().Where(e => e is MsbEntity me && me.Type == MsbEntityType.Model && me.Name == model).FirstOrDefault() == null)
+                        if (!HasModel())
                         {
                             ContainingMap.CreateModel(model);
                         }
@@ -2162,6 +2162,21 @@ public class MsbEntity : Entity
                 base.BuildReferenceMap();
             }
         }
+    }
+
+    /// <summary>
+    /// Whether or not a model entity exists for this entity; Only relevant for part entities.
+    /// </summary>
+    public bool HasModel()
+    {
+        PropertyInfo modelProp = GetProperty("ModelName");
+        if (modelProp != null) // Check if ModelName property exists
+        {
+            var model = (string)modelProp.GetValue(WrappedObject);
+            return Type == MsbEntityType.Part && GetReferencingObjects().Where(e => e is MsbEntity me && me.Type == MsbEntityType.Model && me.Name == model).FirstOrDefault() != null;
+        }
+
+        return false;
     }
 
     /// <summary>

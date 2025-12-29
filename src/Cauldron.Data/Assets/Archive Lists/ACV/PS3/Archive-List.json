@@ -1,0 +1,20 @@
+{
+    "Entries": [
+        {
+            "Name": "dvdbnd5",
+            "IsEncrypted":  false,
+            "Header": {
+                "Path": "/bind/dvdbnd5.bhd",
+                "Folder": "/bind/",
+                "Filename": "dvdbnd5",
+                "Extension": "bhd"
+            },
+            "Data": {
+                "Path": "/bind/dvdbnd.bdt",
+                "Folder": "/bind/",
+                "Filename": "dvdbnd",
+                "Extension": "bdt"
+            }
+        }
+    ]
+}

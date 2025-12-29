@@ -4,6 +4,7 @@ using SoulsFormats;
 using StudioCore.Application;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace StudioCore.Editors.FileBrowser;
@@ -14,9 +15,9 @@ public abstract class SoulsFileFsEntry : FsEntry
     {
         if (fileName.EndsWith("bnd") || fileName.EndsWith("bnd.dcx"))
         {
-            if (ownerProject.ProjectType == ProjectType.DS1
-                || ownerProject.ProjectType == ProjectType.DS1R
-                || ownerProject.ProjectType == ProjectType.DES)
+            if (ownerProject.ProjectType == ProjectType.ACFA
+                || ownerProject.ProjectType == ProjectType.ACV
+                || ownerProject.ProjectType == ProjectType.ACVD)
             {
                 return new Bnd3FsEntry(fileName, getDataFunc);
             }
@@ -41,8 +42,9 @@ public abstract class SoulsFileFsEntry : FsEntry
             var vfile = vfs.GetFile(path);
             if (vfile is RealVirtualFileSystem.RealVirtualFile vf)
             {
-                bool isDvdbnd = Regex.IsMatch(fileName.ToLower(), @"(.*dvdbnd.*)|(.*ebl\.bdt)|(.*data\d\.bdt)");
+                var dvdbndEntry = ownerProject.ArchiveList.Entries.FirstOrDefault(e => fileName.Contains(e.Data.Filename, StringComparison.InvariantCultureIgnoreCase));
 
+                bool isDvdbnd = dvdbndEntry != null;
                 if (!isDvdbnd)
                 {
                     using (var fs = vf.GetFileStream())
@@ -53,17 +55,11 @@ public abstract class SoulsFileFsEntry : FsEntry
                     }
                 }
 
-                if (isDvdbnd)
+                if (dvdbndEntry != null) // To please the linter
                 {
                     //TaskLogs.AddVerboseLog($"[File Browser] Binder file {fileName} appears to be a dvdbnd bdt", LogLevel.Debug);
 
-                    string bhdPath = path.Replace(".bdt", ".bhd");
-
-                    if (ownerProject.ProjectType == ProjectType.DS1)
-                    {
-                        bhdPath += "5";
-                    }
-
+                    string bhdPath = dvdbndEntry.Header.Path;
                     if (!vfs.FileExists(bhdPath))
                     {
                         //TaskLogs.AddVerboseLog($"[File Browser] Couldn't find bhd for bdt file {fileName}", LogLevel.Warning);
@@ -77,6 +73,7 @@ public abstract class SoulsFileFsEntry : FsEntry
 
                     return new DvdBndFsEntry(
                         fileName,
+                        dvdbndEntry,
                         () => vf.GetFileStream(),
                         () => bhdBytes.Value);
                 }
@@ -90,9 +87,9 @@ public abstract class SoulsFileFsEntry : FsEntry
                 return null;
             }
 
-            if (ownerProject.ProjectType == ProjectType.DS1
-                || ownerProject.ProjectType == ProjectType.DS1R
-                || ownerProject.ProjectType == ProjectType.DES)
+            if (ownerProject.ProjectType == ProjectType.ACFA
+                || ownerProject.ProjectType == ProjectType.ACV
+                || ownerProject.ProjectType == ProjectType.ACVD)
             {
                 return new Bxf3FsEntry(fileName, getDataFunc, getBhdData);
             }
@@ -108,11 +105,12 @@ public abstract class SoulsFileFsEntry : FsEntry
             if (!BXF3.IsBHD(data) && !BXF4.IsBHD(data))
             {
                 //TaskLogs.AddLog($"[File Browser] Binder file {fileName} appears to be a dvdbnd bhd", LogLevel.Debug);
-                return new DvdBndFsEntry(fileName, null, getDataFunc);
+                var dvdbndEntry = ownerProject.ArchiveList.Entries.FirstOrDefault(e => fileName.Contains(e.Header.Filename, StringComparison.InvariantCultureIgnoreCase));
+                return new DvdBndFsEntry(fileName, dvdbndEntry, null, getDataFunc);
             }
-            if (ownerProject.ProjectType == ProjectType.DS1
-                || ownerProject.ProjectType == ProjectType.DS1R
-                || ownerProject.ProjectType == ProjectType.DES)
+            if (ownerProject.ProjectType == ProjectType.ACFA
+                || ownerProject.ProjectType == ProjectType.ACV
+                || ownerProject.ProjectType == ProjectType.ACVD)
             {
                 return new Bhd3FsEntry(fileName, getDataFunc);
             }

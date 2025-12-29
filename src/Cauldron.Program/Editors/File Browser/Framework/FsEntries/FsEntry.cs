@@ -89,7 +89,7 @@ public abstract class FsEntry
 
     public static FsEntry? TryGetFor(ProjectEntry ownerProject, string fileName, Func<Memory<byte>> getDataFunc, VirtualFileSystem? vfs = null, string? path = null)
     {
-        if (fileName.EndsWith(".txt"))
+        if (fileName.EndsWith(".txt") || fileName.EndsWith(".properties"))
         {
             return new TextFsEntry(ownerProject, fileName, getDataFunc);
         }

@@ -1,4 +1,5 @@
 ﻿using Hexa.NET.ImGui;
+using StudioCore.Editors.FileBrowser;
 using StudioCore.Utilities;
 using System;
 using System.IO;
@@ -9,8 +10,9 @@ namespace StudioCore.Application;
 public static class FileDictionaryGenerator
 {
     public static string _filePath = "";
+    public static string _folderPath = "";
 
-    public static void Display(Cauldron baseEditor, ProjectEntry project)
+    public static void DisplayUxmGenerator(Cauldron baseEditor, ProjectEntry project)
     {
         if (ImGui.BeginTable($"generatorTable", 3, ImGuiTableFlags.SizingFixedFit))
         {
@@ -35,10 +37,7 @@ public static class FileDictionaryGenerator
 
             if (ImGui.Button("Select##generatorPathSelect", DPI.StandardButtonSize))
             {
-                var newFilePath = "";
-                var result = PlatformUtils.Instance.OpenFileDialog("Select File", [""], out newFilePath);
-
-                if (result)
+                if (PlatformUtils.Instance.OpenFileDialog("Select File", [""], out string newFilePath))
                 {
                     _filePath = newFilePath;
                 }
@@ -52,6 +51,49 @@ public static class FileDictionaryGenerator
             if (ImGui.Button("Generate File Dictionary JSON", DPI.StandardButtonSize))
             {
                 GenerateFileDictionaryFromUXM(_filePath);
+            }
+        }
+    }
+
+    public static void DisplayRootGenerator(Cauldron baseEditor, ProjectEntry project)
+    {
+        if (ImGui.BeginTable($"generatorTable", 3, ImGuiTableFlags.SizingFixedFit))
+        {
+            ImGui.TableSetupColumn("Title", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("Input", ImGuiTableColumnFlags.WidthFixed);
+            ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthStretch);
+
+            // File Path
+            ImGui.TableNextRow();
+            ImGui.TableSetColumnIndex(0);
+
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Folder Path");
+            UIHelper.Tooltip("The folder path of the folder.");
+
+            ImGui.TableSetColumnIndex(1);
+
+            DPI.ApplyInputWidth();
+            ImGui.InputText("##generatorPath", ref _folderPath, 255);
+
+            ImGui.TableSetColumnIndex(2);
+
+            if (ImGui.Button("Select##generatorPathSelect", DPI.StandardButtonSize))
+            {
+                if (PlatformUtils.Instance.OpenFolderDialog("Select Folder", out string newFolderPath))
+                {
+                    _folderPath = newFolderPath;
+                }
+            }
+
+            ImGui.EndTable();
+        }
+
+        if (Directory.Exists(_folderPath))
+        {
+            if (ImGui.Button("Generate File Dictionary JSON", DPI.StandardButtonSize))
+            {
+                GenerateFileDictionaryFromRoot(_folderPath);
             }
         }
     }
@@ -115,6 +157,81 @@ public static class FileDictionaryGenerator
 
                     curDictionary.Entries.Add(newEntry);
                 }
+            }
+        }
+
+        var json = JsonSerializer.Serialize(curDictionary, ProjectJsonSerializerContext.Default.FileDictionary);
+
+        File.WriteAllText(writePath, json);
+    }
+
+    public static void GenerateFileDictionaryFromRoot(string folderpath)
+    {
+        var writePath = $"{AppContext.BaseDirectory}/{Path.GetFileName(folderpath)}.json";
+
+        var curDictionary = new FileDictionary();
+        curDictionary.Entries = new();
+
+        foreach (string filepath in Directory.EnumerateFiles(folderpath, "*", SearchOption.AllDirectories))
+        {
+            string fileFolderPath = Path.GetDirectoryName(filepath);
+            if (string.IsNullOrEmpty(fileFolderPath))
+            {
+                continue;
+            }
+
+            string relativeFolderPath = fileFolderPath.Replace(folderpath, string.Empty);
+            relativeFolderPath = relativeFolderPath.Trim();
+            relativeFolderPath = relativeFolderPath.Trim('\\');
+            relativeFolderPath = relativeFolderPath.Trim('/');
+            relativeFolderPath = relativeFolderPath.Trim(Path.DirectorySeparatorChar);
+            relativeFolderPath = relativeFolderPath.Trim(Path.AltDirectorySeparatorChar);
+            relativeFolderPath = relativeFolderPath.Replace('\\', '/');
+            relativeFolderPath = relativeFolderPath.Replace(Path.DirectorySeparatorChar, '/');
+            relativeFolderPath = relativeFolderPath.Replace(Path.AltDirectorySeparatorChar, '/');
+
+            string relativePath;
+            if (relativeFolderPath == string.Empty)
+                relativePath = $"/{Path.GetFileName(filepath)}";
+            else
+                relativePath = $"/{relativeFolderPath}/{Path.GetFileName(filepath)}";
+
+            var newEntry = new FileDictionaryEntry();
+            newEntry.Archive = string.Empty;
+            newEntry.Path = relativePath.Replace("\r", "");
+
+            if (newEntry.Path != "")
+            {
+                string newEntryDir = Path.GetDirectoryName(newEntry.Path);
+                if (string.IsNullOrEmpty(newEntryDir))
+                    newEntry.Folder = "/";
+                else
+                    newEntry.Folder = newEntryDir.Replace('\\', '/');
+
+                if (relativePath.Contains(".dcx"))
+                {
+                    var extension = Path.GetExtension(Path.GetFileNameWithoutExtension(newEntry.Path));
+                    var fileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(relativePath));
+                    newEntry.Filename = Path.GetFileName(fileName);
+
+                    if (extension != "")
+                        newEntry.Extension = Path.GetFileName(extension).Substring(1, extension.Length - 1);
+                    else
+                        newEntry.Extension = "";
+                }
+                else
+                {
+                    var extension = Path.GetExtension(newEntry.Path);
+                    var fileName = Path.GetFileNameWithoutExtension(relativePath);
+                    newEntry.Filename = Path.GetFileName(fileName);
+
+                    if (extension != "")
+                        newEntry.Extension = Path.GetFileName(extension).Substring(1, extension.Length - 1);
+                    else
+                        newEntry.Extension = "";
+                }
+
+                curDictionary.Entries.Add(newEntry);
             }
         }
 

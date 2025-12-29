@@ -1,0 +1,46 @@
+{
+  "Entries": [
+    {
+      "Archive": "dvdbnd5_layer1",
+      "Path": "/model/map/ingamegarage/ingamegaragemenu0320_env.msb",
+      "Folder": "/model/map/ingamegarage",
+      "Filename": "ingamegaragemenu0320_env",
+      "Extension": "msb"
+    },
+    {
+      "Archive": "dvdbnd5_layer1",
+      "Path": "/model/map/ingamegarage/ingamegaragemenu0350_env.msb",
+      "Folder": "/model/map/ingamegarage",
+      "Filename": "ingamegaragemenu0350_env",
+      "Extension": "msb"
+    },
+    {
+      "Archive": "dvdbnd5_layer1",
+      "Path": "/model/map/m3107/m3107.msb",
+      "Folder": "/model/map/m3107",
+      "Filename": "m3107",
+      "Extension": "msb"
+    },
+    {
+      "Archive": "dvdbnd5_layer1",
+      "Path": "/model/map/m3107/m3107_map.msb",
+      "Folder": "/model/map/m3107",
+      "Filename": "m3107_map",
+      "Extension": "msb"
+    },
+    {
+      "Archive": "dvdbnd5_layer1",
+      "Path": "/model/map/map_template/map_template.msb",
+      "Folder": "/model/map/map_template",
+      "Filename": "map_template",
+      "Extension": "msb"
+    },
+    {
+      "Archive": "dvdbnd5_layer1",
+      "Path": "/model/map/map_template/map_template_map.msb",
+      "Folder": "/model/map/map_template",
+      "Filename": "map_template_map",
+      "Extension": "msb"
+    }
+  ]
+}

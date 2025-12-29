@@ -187,9 +187,9 @@ public class FileSelection
 
             if (bhd.Length != 0 && bdt.Length != 0)
             {
-                if (Project.ProjectType is ProjectType.DES
-                    or ProjectType.DS1
-                    or ProjectType.DS1R)
+                if (Project.ProjectType is ProjectType.ACFA
+                    or ProjectType.ACV
+                    or ProjectType.ACVD)
                 {
                     var binder = new BXF3Reader(bhd, bdt);
                     foreach (var file in binder.Files)

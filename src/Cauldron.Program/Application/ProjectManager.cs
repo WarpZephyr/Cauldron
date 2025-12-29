@@ -148,6 +148,24 @@ public class ProjectManager
                 }
             }
 
+            if (Projects.Any(e => e.ProjectType is ProjectType.ACFA))
+            {
+                if (ImGui.BeginTabItem("ACFA##tab_ACFA"))
+                {
+                    DisplayProjectListGroup(ProjectType.ACFA);
+                    ImGui.EndTabItem();
+                }
+            }
+
+            if (Projects.Any(e => e.ProjectType is ProjectType.ACV))
+            {
+                if (ImGui.BeginTabItem("ACV##tab_ACV"))
+                {
+                    DisplayProjectListGroup(ProjectType.ACV);
+                    ImGui.EndTabItem();
+                }
+            }
+
             if (Projects.Any(e => e.ProjectType is ProjectType.ACVD))
             {
                 if (ImGui.BeginTabItem("ACVD##tab_ACVD"))
@@ -637,8 +655,9 @@ public class ProjectManager
         var projectPath = ProjectCreation.ProjectPath;
         var dataPath = ProjectCreation.DataPath;
         var projectType = ProjectCreation.ProjectType;
+        var projectPlatform = ProjectCreation.ProjectPlatform;
 
-        var newProject = new ProjectEntry(BaseEditor, guid, projectName, projectPath, dataPath, projectType);
+        var newProject = new ProjectEntry(BaseEditor, guid, projectName, projectPath, dataPath, projectType, projectPlatform);
 
         newProject.AutoSelect = ProjectCreation.AutoSelect;
         newProject.ImportedParamRowNames = !ProjectCreation.RowNameImport;

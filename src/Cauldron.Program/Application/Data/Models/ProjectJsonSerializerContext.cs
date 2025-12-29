@@ -21,6 +21,10 @@ namespace StudioCore.Application;
 [JsonSerializable(typeof(FileDictionary))]
 [JsonSerializable(typeof(FileDictionaryEntry))]
 
+[JsonSerializable(typeof(ArchiveList))]
+[JsonSerializable(typeof(ArchiveListEntry))]
+[JsonSerializable(typeof(ArchiveFileEntry))]
+
 // Alias Data
 [JsonSerializable(typeof(AliasStore))]
 [JsonSerializable(typeof(AliasEntry))]

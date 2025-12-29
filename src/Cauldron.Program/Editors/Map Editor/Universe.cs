@@ -181,7 +181,7 @@ public class Universe
                         resourceHandler.SetupHumanEnemySubstitute();
 
                     resourceHandler.SetupModelLoadLists();
-                    resourceHandler.SetupTexturelLoadLists();
+                    resourceHandler.SetupTextureLoadLists();
                     resourceHandler.SetupModelMasks(newMap);
                 }
 

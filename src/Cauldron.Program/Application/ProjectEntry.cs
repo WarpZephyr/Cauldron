@@ -1,4 +1,6 @@
-﻿using Andre.IO.VFS;
+﻿using Andre.Core.Util;
+using Andre.Formats;
+using Andre.IO.VFS;
 using Microsoft.Extensions.Logging;
 using StudioCore.Editors.Common;
 using StudioCore.Editors.FileBrowser;
@@ -32,6 +34,7 @@ public class ProjectEntry
     public string ProjectPath;
     public string DataPath;
     public ProjectType ProjectType;
+    public ProjectPlatform ProjectPlatform;
 
     public bool ImportedParamRowNames;
     public bool AutoSelect;
@@ -67,6 +70,8 @@ public class ProjectEntry
     public VirtualFileSystem VanillaFS = EmptyVirtualFileSystem.Instance;
     [JsonIgnore]
     public FileDictionary FileDictionary;
+    [JsonIgnore]
+    public ArchiveList ArchiveList;
 
     [JsonIgnore]
     public Cauldron BaseEditor;
@@ -149,7 +154,7 @@ public class ProjectEntry
 
     public ProjectEntry() { }
 
-    public ProjectEntry(Cauldron baseEditor, Guid newGuid, string projectName, string projectPath, string dataPath, ProjectType projectType)
+    public ProjectEntry(Cauldron baseEditor, Guid newGuid, string projectName, string projectPath, string dataPath, ProjectType projectType, ProjectPlatform projectPlatform)
     {
         BaseEditor = baseEditor;
         ProjectGUID = newGuid;
@@ -157,6 +162,7 @@ public class ProjectEntry
         ProjectPath = projectPath;
         DataPath = dataPath;
         ProjectType = projectType;
+        ProjectPlatform = projectPlatform;
         ImportedParamRowNames = false;
 
         // Defaults
@@ -240,7 +246,7 @@ public class ProjectEntry
             }
             else
             {
-                TaskLogs.AddLog($"[{ProjectName}] Failed to setup virtual filesystem.");
+                TaskLogs.AddLog($"[{ProjectName}] Failed to fully setup virtual filesystem.");
             }
         }
 
@@ -906,6 +912,7 @@ public class ProjectEntry
     {
         await Task.Yield();
 
+        bool result = true;
         List<VirtualFileSystem> fileSystems = [];
 
         ProjectFS.Dispose();
@@ -913,7 +920,7 @@ public class ProjectEntry
         VanillaBinderFS.Dispose();
         VanillaFS.Dispose();
         FS.Dispose();
-
+        
         // Order of addition to FS determines precendence when getting a file
         // e.g. ProjectFS is prioritised over VanillaFS
 
@@ -928,29 +935,25 @@ public class ProjectEntry
             ProjectFS = EmptyVirtualFileSystem.Instance;
         }
 
+        // Setup archive lists
+        Task<bool> setupArchiveListsTask = SetupArchiveLists();
+        if (!await setupArchiveListsTask)
+            result = false;
+
         // Vanilla File System
         if (Directory.Exists(DataPath))
         {
             VanillaRealFS = new RealVirtualFileSystem(DataPath, false);
             fileSystems.Add(VanillaRealFS);
 
-            var andreGame = ProjectType.AsAndreGame();
-
-            if (andreGame != null)
+            if (ProjectType.IsPackedGame())
             {
-                if (!ProjectType.IsLooseGame())
-                {
-                    VanillaBinderFS = ArchiveBinderVirtualFileSystem.FromGameFolder(DataPath, andreGame.Value);
-                    fileSystems.Add(VanillaBinderFS);
-                }
+                Task<bool> setupBinderfsTask = SetupBinderVFS(fileSystems);
+                if (!await setupBinderfsTask)
+                    result = false;
+            }
 
-                VanillaFS = new CompundVirtualFileSystem([VanillaRealFS, VanillaBinderFS]);
-            }
-            else
-            {
-                VanillaRealFS = EmptyVirtualFileSystem.Instance;
-                VanillaFS = EmptyVirtualFileSystem.Instance;
-            }
+            VanillaFS = new CompoundVirtualFileSystem([VanillaBinderFS, VanillaRealFS]);
         }
         else
         {
@@ -958,76 +961,208 @@ public class ProjectEntry
             VanillaFS = EmptyVirtualFileSystem.Instance;
         }
 
-
         if (fileSystems.Count == 0)
             FS = EmptyVirtualFileSystem.Instance;
         else
-            FS = new CompundVirtualFileSystem(fileSystems);
-
-        var folder = Path.Join(AppContext.BaseDirectory,"Assets","File Dictionaries");
-        var file = "";
+            FS = new CompoundVirtualFileSystem(fileSystems);
 
         // Build the file dictionary JSON objects here
-        switch (ProjectType)
+        FileDictionary = new()
         {
-            case ProjectType.DES:
-                file = "DES-File-Dictionary.json"; break;
-            case ProjectType.DS1:
-                file = "DS1-File-Dictionary.json"; break;
-            case ProjectType.DS1R:
-                file = "DS1R-File-Dictionary.json"; break;
-            case ProjectType.DS2:
-                file = "DS2-File-Dictionary.json"; break;
-            case ProjectType.DS2S:
-                file = "DS2S-File-Dictionary.json"; break;
-            case ProjectType.DS3:
-                file = "DS3-File-Dictionary.json"; break;
-            case ProjectType.BB:
-                file = "BB-File-Dictionary.json"; break;
-            case ProjectType.SDT:
-                file = "SDT-File-Dictionary.json"; break;
-            case ProjectType.ER:
-                file = "ER-File-Dictionary.json"; break;
-            case ProjectType.ACVD:
-                file = "ACVD-File-Dictionary.json"; break;
-            case ProjectType.AC6:
-                file = "AC6-File-Dictionary.json"; break;
-            case ProjectType.NR:
-                file = "NR-File-Dictionary.json"; break;
-            default: break;
+            Entries = []
+        };
+
+        // Build binder archive dictionaries
+        foreach (var entry in ArchiveList.Entries)
+        {
+            string bndFileDictPath = ProjectAssetPath.GetFileDictionaryPath(this, entry.Name);
+            var bndFileDictLoad = await LoadFileDictionary(bndFileDictPath);
+            var bndFileDictLoaded = bndFileDictLoad.Item1;
+            var bndFileDict = bndFileDictLoad.Item2;
+
+            if (!bndFileDictLoaded)
+                result = false;
+
+            if (bndFileDict != null)
+            {
+                string bndFileDictRemPath = ProjectAssetPath.GetFileDictionaryRemovalPath(this, entry.Name);
+                var bndFileDictRemLoad = await LoadFileDictionary(bndFileDictRemPath);
+                var bndFileDictRemLoaded = bndFileDictRemLoad.Item1;
+                var bndFileDictRem = bndFileDictRemLoad.Item2;
+
+                if (!bndFileDictRemLoaded)
+                    result = false;
+
+                if (bndFileDictRem != null)
+                {
+                    bndFileDict.Entries.RemoveAll(e => bndFileDictRem.Entries.Exists(r => r.Path.Equals(e.Path, StringComparison.InvariantCultureIgnoreCase)));
+                }
+
+                FileDictionary = ProjectUtils.MergeFileDictionaries(FileDictionary, bndFileDict);
+            }
         }
 
-        var filepath = Path.Join(folder, file);
+        // Build vanilla file dictionaries
+        string fileDictPath = ProjectAssetPath.GetFileDictionaryPath(this);
+        var fileDictLoad = await LoadFileDictionary(fileDictPath);
+        var fileDictLoaded = fileDictLoad.Item1;
+        var fileDict = fileDictLoad.Item2;
 
-        FileDictionary = new();
-        FileDictionary.Entries = new();
+        if (!fileDictLoaded)
+            result = false;
 
-        if (File.Exists(filepath))
+        if (fileDict != null)
+        {
+            string fileDictRemPath = ProjectAssetPath.GetFileDictionaryRemovalPath(this);
+            var fileDictRemLoad = await LoadFileDictionary(fileDictRemPath);
+            var fileDictRemLoaded = fileDictRemLoad.Item1;
+            var fileDictRem = fileDictRemLoad.Item2;
+
+            if (!fileDictRemLoaded)
+                result = false;
+
+            if (fileDictRem != null)
+            {
+                fileDict.Entries.RemoveAll(e => fileDictRem.Entries.Exists(r => r.Path.Equals(e.Path, StringComparison.InvariantCultureIgnoreCase)));
+            }
+
+            FileDictionary = ProjectUtils.MergeFileDictionaries(FileDictionary, fileDict);
+        }
+
+        // Remove missing file entries
+        ProjectUtils.RemoveMissingFiles(VanillaFS, FileDictionary);
+
+        // Create merged dictionary, including unique entries present in the project directory only.
+        var projectFileDictionary = ProjectUtils.BuildFromSource(ProjectPath, FileDictionary, ProjectType);
+        FileDictionary = ProjectUtils.MergeFileDictionaries(projectFileDictionary, FileDictionary);
+        return result;
+    }
+
+    private async Task<bool> SetupArchiveLists()
+    {
+        ArchiveList = new ArchiveList()
+        {
+            Entries = []
+        };
+
+        string archiveListFilePath = ProjectAssetPath.GetArchiveListPath(this);
+        if (File.Exists(archiveListFilePath))
         {
             try
             {
-                var filestring = await File.ReadAllTextAsync(filepath);
+                var archiveListString = await File.ReadAllTextAsync(archiveListFilePath);
 
                 try
                 {
-                    FileDictionary = JsonSerializer.Deserialize(filestring, ProjectJsonSerializerContext.Default.FileDictionary);
+                    ArchiveList = JsonSerializer.Deserialize(archiveListString, ProjectJsonSerializerContext.Default.ArchiveList);
                 }
                 catch (Exception e)
                 {
-                    TaskLogs.AddLog($"[Cauldron] Failed to deserialize the file dictionary: {filepath}", LogLevel.Error, LogPriority.High, e);
+                    TaskLogs.AddLog($"[Cauldron] Failed to deserialize the archives list: {archiveListFilePath}", LogLevel.Error, LogPriority.High, e);
+                    return false;
                 }
             }
             catch (Exception e)
             {
-                TaskLogs.AddLog($"[Cauldron] Failed to read the file dictionary: {filepath}", LogLevel.Error, LogPriority.High, e);
+                TaskLogs.AddLog($"[Cauldron] Failed to read the archives list: {archiveListFilePath}", LogLevel.Error, LogPriority.High, e);
+                return false;
             }
         }
 
-        // Create merged dictionary, including unique entries present in the project directory only.
-        var projectFileDictionary = ProjectUtils.BuildFromSource(ProjectPath, FileDictionary, ProjectType);
-        FileDictionary = ProjectUtils.MergeFileDictionaries(FileDictionary, projectFileDictionary);
-
         return true;
+    }
+
+    private async Task<bool> SetupBinderVFS(List<VirtualFileSystem> fileSystems)
+    {
+        var bhdGame = ProjectType.AsBhdGame();
+        if (bhdGame == null)
+        {
+            return true;
+        }
+
+        bool result = true;
+        var binderFSs = new List<VirtualFileSystem>();
+        foreach (var entry in ArchiveList.Entries)
+        {
+            var header = entry.Header;
+            var data = entry.Data;
+            var headerPath = Path.Join(DataPath, header.Path);
+            var dataPath = Path.Join(DataPath, data.Path);
+            var dictionaryPath = ProjectAssetPath.GetArchiveDictionaryPath(this, entry.Name);
+
+            if (File.Exists(headerPath) && File.Exists(dataPath) && File.Exists(dictionaryPath))
+            {
+                string dictStr = string.Empty;
+
+                try
+                {
+                    dictStr = await File.ReadAllTextAsync(dictionaryPath);
+                }
+                catch (Exception e)
+                {
+                    TaskLogs.AddLog($"[Cauldron] Failed to read an archive dictionary: {dictionaryPath}", LogLevel.Error, LogPriority.High, e);
+                    result = false;
+                    continue;
+                }
+
+                var bhdDictionary = new BhdDictionary(dictStr, bhdGame.Value);
+                string archiveKey = null;
+                if (entry.IsEncrypted)
+                {
+                    var archiveKeyPath = ProjectAssetPath.GetArchiveKeyPath(this, entry.Name);
+                    if (File.Exists(archiveKeyPath))
+                    {
+                        try
+                        {
+                            archiveKey = await File.ReadAllTextAsync(archiveKeyPath);
+                        }
+                        catch (Exception e)
+                        {
+                            TaskLogs.AddLog($"[Cauldron] Failed to read an archive decryption key: {archiveKeyPath}", LogLevel.Error, LogPriority.High, e);
+                            result = false;
+                            
+                            // Still try read anyways because a user may have decrypted it prior themselves
+                        }
+                    }
+                }
+
+                BinderArchive binder = new BinderArchive(headerPath, dataPath, bhdGame.Value, entry.IsEncrypted, archiveKey);
+                var binderFs = new ArchiveBinderVirtualFileSystem(entry.Name, binder, bhdDictionary);
+                binderFSs.Add(binderFs);
+                fileSystems.Add(binderFs);
+            }
+        }
+
+        VanillaBinderFS = new CompoundVirtualFileSystem(binderFSs);
+        return result;
+    }
+
+    private async Task<(bool, FileDictionary)> LoadFileDictionary(string path)
+    {
+        if (File.Exists(path))
+        {
+            try
+            {
+                var fileDictStr = await File.ReadAllTextAsync(path);
+
+                try
+                {
+                    return (true, JsonSerializer.Deserialize(fileDictStr, ProjectJsonSerializerContext.Default.FileDictionary));
+                }
+                catch (Exception e)
+                {
+                    TaskLogs.AddLog($"[Cauldron] Failed to deserialize a file dictionary: {fileDictStr}", LogLevel.Error, LogPriority.High, e);
+                    return (false, null);
+                }
+            }
+            catch (Exception e)
+            {
+                TaskLogs.AddLog($"[Cauldron] Failed to read a file dictionary: {path}", LogLevel.Error, LogPriority.High, e);
+                return (false, null);
+            }
+        }
+
+        return (true, null);
     }
 
     #endregion

@@ -21,6 +21,7 @@ public class DvdBndFsEntry : SoulsFileFsEntry
     public override bool CanHaveChildren => getBdtStream != null;
     public override List<FsEntry> Children => innerFsEntry?.Children ?? [];
     public override bool CanView => true;
+    private ArchiveListEntry? archiveListEntry;
     internal Func<FileStream>? getBdtStream;
     internal FileStream? bdtStream;
     private Func<Memory<byte>> getBhdFunc;
@@ -34,9 +35,10 @@ public class DvdBndFsEntry : SoulsFileFsEntry
     private VirtualFileSystemFsEntry? innerFsEntry = null;
     private bool wasEncrypted = false;
 
-    public DvdBndFsEntry(string name, Func<FileStream>? getBdtStream, Func<Memory<byte>> getBhdFunc)
+    public DvdBndFsEntry(string name, ArchiveListEntry? archiveListEntry, Func<FileStream>? getBdtStream, Func<Memory<byte>> getBhdFunc)
     {
         this.name = name;
+        this.archiveListEntry = archiveListEntry;
         this.getBdtStream = getBdtStream;
         this.getBhdFunc = getBhdFunc;
     }
@@ -55,23 +57,30 @@ public class DvdBndFsEntry : SoulsFileFsEntry
 
             //TaskLogs.AddVerboseLog($"[File Browser] DVDBND {name} appears encrypted. Decrypting (this may take a while)...");
 
-            string path = name.Replace(".bdt", ".bhd");
-
-            if (ownerProject.ProjectType.AsBhdGame() >= BHD5.Game.EldenRing && name.Contains("sd"))
+            if (archiveListEntry != null && andreGame != null)
             {
-                path = Path.Join("sd", name);
-            }
-
-            if (andreGame != null)
-            {
-                decryptedBhdData = BinderArchive.Decrypt(bhdData.Value, path, andreGame.Value);
-                bhdData = new(decryptedBhdData);
+                string keyPath = ProjectAssetPath.GetArchiveKeyPath(ownerProject, archiveListEntry.Name);
+                string? key = null;
+                if (archiveListEntry.IsEncrypted)
+                {
+                    if (File.Exists(keyPath)) // Otherwise try a normal read, might need to add error handling for this later
+                    {
+                        key = File.ReadAllText(keyPath);
+                        decryptedBhdData = BinderArchive.Decrypt(bhdData.Value, archiveListEntry.Header.Path, key);
+                        bhdData = new(decryptedBhdData);
+                    }
+                }
             }
         }
 
-        if (andreGame != null && bhdGame != null)
+        if (archiveListEntry != null && andreGame != null && bhdGame != null)
         {
-            dictionary = ArchiveBinderVirtualFileSystem.GetDictionaryForGame(andreGame.Value);
+            var dictionaryPath = ProjectAssetPath.GetArchiveDictionaryPath(ownerProject, archiveListEntry.Name);
+            string dictStr = string.Empty;
+            if (File.Exists(dictionaryPath))
+                dictStr = File.ReadAllText(dictionaryPath);
+
+            dictionary = new BhdDictionary(dictionaryPath, bhdGame.Value);
 
             bhd = BHD5.Read(bhdData.Value, bhdGame.Value);
 
@@ -79,7 +88,7 @@ public class DvdBndFsEntry : SoulsFileFsEntry
             {
                 bdtStream = getBdtStream();
                 archive = new(bhd, bdtStream, wasEncrypted);
-                innerFs = new ArchiveBinderVirtualFileSystem([archive], dictionary);
+                innerFs = new ArchiveBinderVirtualFileSystem(archiveListEntry.Name, archive, dictionary);
                 innerFsEntry = new(ownerProject, innerFs, name);
                 innerFsEntry.Load(ownerProject);
             }

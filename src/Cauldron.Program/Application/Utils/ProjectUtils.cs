@@ -4,7 +4,6 @@ using SoulsFormats;
 using StudioCore.Utilities;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 
@@ -23,32 +22,51 @@ public class ProjectUtils
         {
             case ProjectType.Undefined:
                 return "NONE";
-            case ProjectType.DES:
-                return "DES";
-            case ProjectType.DS1:
-                return "DS1";
-            case ProjectType.DS1R:
-                return "DS1R";
-            case ProjectType.DS2:
-                return "DS2";
-            case ProjectType.DS2S:
-                return "DS2S";
-            case ProjectType.BB:
-                return "BB";
-            case ProjectType.DS3:
-                return "DS3";
-            case ProjectType.SDT:
-                return "SDT";
-            case ProjectType.ER:
-                return "ER";
+            case ProjectType.ACFA:
+                return "ACFA";
+            case ProjectType.ACV:
+                return "ACV";
             case ProjectType.ACVD:
                 return "ACVD";
-            case ProjectType.AC6:
-                return "AC6";
-            case ProjectType.NR:
-                return "NR";
             default:
                 throw new Exception("Game type not set");
+        }
+    }
+
+    public static string GetPlatformDirectory(ProjectEntry curProject)
+    {
+        return GetPlatformDirectory(curProject.ProjectPlatform);
+    }
+
+    public static string GetPlatformDirectory(ProjectPlatform curProjectPlatform)
+    {
+        switch (curProjectPlatform)
+        {
+            case ProjectPlatform.Undefined:
+                return "NONE";
+            case ProjectPlatform.PC:
+                return "DES";
+            case ProjectPlatform.PS3:
+                return "PS3";
+            case ProjectPlatform.Xbox360:
+                return "Xbox360";
+            default:
+                throw new Exception("Platform type not set");
+        }
+    }
+
+    public static ProjectPlatform[] GetSupportedPlatforms(ProjectType curProjectType)
+    {
+        switch (curProjectType)
+        {
+            case ProjectType.Undefined:
+                return [];
+            case ProjectType.ACFA:
+            case ProjectType.ACV:
+            case ProjectType.ACVD:
+                return [ProjectPlatform.PS3, ProjectPlatform.Xbox360];
+            default:
+                throw new Exception("Platform type not set");
         }
     }
 
@@ -266,6 +284,18 @@ public class ProjectUtils
             : path.Trim().Replace('\\', '/'); // normalize separators and trim
     }
 
+    public static void RemoveMissingFiles(VirtualFileSystem fs, FileDictionary dict)
+    {
+        for (int i = dict.Entries.Count - 1; i >= 0; i--)
+        {
+            var entry = dict.Entries[i];
+            if (!fs.FileExists(entry.Path))
+            {
+                dict.Entries.RemoveAt(i);
+            }
+        }
+    }
+
     /// <summary>
     /// Gets the VirtualFileSystem we should use for writes.
     /// If no suitable VFS is found, throws InvalidOperationException.
@@ -403,22 +433,17 @@ public class ProjectUtils
 
     public static bool SupportsModelEditor(ProjectType curType)
     {
+        if (curType is ProjectType.ACFA)
+        {
+            return false;
+        }
+
         return true;
     }
 
     public static bool SupportsTextEditor(ProjectType curType)
     {
         return true;
-    }
-
-    public static bool SupportsFmgEditor(ProjectType curType)
-    {
-        if (curType is ProjectType.NR)
-        {
-            return true;
-        }
-
-        return false;
     }
 
     public static bool SupportsParamEditor(ProjectType curType)
@@ -428,12 +453,9 @@ public class ProjectUtils
 
     public static bool SupportsGraphicsParamEditor(ProjectType curType)
     {
-        if (curType 
-            is ProjectType.DES 
-            or ProjectType.DS1 
-            or ProjectType.DS1R 
-            or ProjectType.DS2 
-            or ProjectType.DS2S)
+        if (curType is ProjectType.ACFA
+            or ProjectType.ACV 
+            or ProjectType.ACVD)
         {
             return false;
         }

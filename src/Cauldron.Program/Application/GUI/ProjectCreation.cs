@@ -15,6 +15,7 @@ public static class ProjectCreation
     public static string ProjectPath = "";
     public static string DataPath = "";
     public static ProjectType ProjectType = ProjectType.Undefined;
+    public static ProjectPlatform ProjectPlatform = ProjectPlatform.Undefined;
 
     public static string FolderTag = "";
 
@@ -46,6 +47,8 @@ public static class ProjectCreation
     // Used so the project type combo box has a specific order
     public static List<ProjectType> ProjectTypeOrder = new()
     {
+        ProjectType.ACFA,
+        ProjectType.ACV,
         ProjectType.ACVD
     };
 
@@ -180,6 +183,37 @@ public static class ProjectCreation
 
                     ImGui.TableSetColumnIndex(2);
 
+                    // Project Platform
+                    ImGui.TableNextRow();
+                    ImGui.TableSetColumnIndex(0);
+
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.Text("Project Platform");
+                    UIHelper.Tooltip("The platform this project is targeting.");
+
+                    ImGui.TableSetColumnIndex(1);
+
+                    DPI.ApplyInputWidth();
+                    if (ImGui.BeginCombo("##projectPlatformPicker", ProjectPlatform.GetDisplayName()))
+                    {
+                        // Make the combo-box dropdown bigger so there is no need to scroll
+                        ImGui.SetNextWindowSize(new Vector2(600.0f, 600.0f) * DPI.UIScale(), ImGuiCond.FirstUseEver);
+
+                        var supportedPlatforms = ProjectUtils.GetSupportedPlatforms(ProjectType);
+                        foreach (var entry in supportedPlatforms)
+                        {
+                            var type = (ProjectPlatform)entry;
+
+                            if (ImGui.Selectable(type.GetDisplayName()))
+                            {
+                                ProjectPlatform = type;
+                            }
+                        }
+                        ImGui.EndCombo();
+                    }
+
+                    ImGui.TableSetColumnIndex(2);
+
                     // Project Path
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(0);
@@ -227,13 +261,13 @@ public static class ProjectCreation
                     ImGui.Text("Data Directory");
 
                     var tooltip = "The location of the game data.";
-                    if (ProjectType is ProjectType.DES or ProjectType.AC4 or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+                    if (ProjectPlatform is ProjectPlatform.PS3)
                     {
                         tooltip = $"{tooltip}\nSelect the USRDIR folder.";
                     }
-                    else if (ProjectType is ProjectType.BB)
+                    else if (ProjectPlatform is ProjectPlatform.Xbox360)
                     {
-                        tooltip = $"{tooltip}\nSelect the dvdroot_ps4 folder.";
+                        tooltip = $"{tooltip}\nSelect the folder containing the game's default.xex file.";
                     }
                     else
                     {
@@ -525,6 +559,9 @@ public static class ProjectCreation
         if (ProjectType is ProjectType.Undefined)
             isAllowed = false;
 
+        if (ProjectPlatform is ProjectPlatform.Undefined)
+            isAllowed = false;
+
         return isAllowed;
     }
 
@@ -543,6 +580,9 @@ public static class ProjectCreation
 
         if (ProjectType is ProjectType.Undefined)
             tooltip = tooltip + "\n" + "Project type cannot be undefined.";
+
+        if (ProjectPlatform is ProjectPlatform.Undefined)
+            tooltip = tooltip + "\n" + "Project platform cannot be undefined.";
 
         return tooltip;
     }

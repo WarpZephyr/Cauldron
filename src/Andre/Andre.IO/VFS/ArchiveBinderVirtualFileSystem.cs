@@ -15,103 +15,70 @@ namespace Andre.IO.VFS
     /// </summary>
     public class ArchiveBinderVirtualFileSystem : VirtualFileSystem
     {
-        private BinderArchive[] binders;
+        private BinderArchive binder;
         private BhdDictionary dictionary;
         private List<BinderVirtualFile> fileList;
         private Dictionary<string, BinderVirtualFile> files;
         private BinderVirtualDirectory root;
         private List<(string, BHD5.FileHeader)> fileHeaders;
 
+        public string Name { get; init; }
         public override bool IsReadOnly => true;
         public override VirtualDirectory FsRoot => root;
 
-        public ArchiveBinderVirtualFileSystem(BinderArchive[] binders, BhdDictionary dictionary)
+        public ArchiveBinderVirtualFileSystem(string name, BinderArchive binder, BhdDictionary dictionary)
         {
-            this.binders = binders;
+            this.Name = name;
+            this.binder = binder;
             this.dictionary = dictionary;
             files = new();
-            int numFiles = binders.Sum(b => b.Buckets.Sum(bucket => bucket.Count));
+            int numFiles = binder.Buckets.Sum(bucket => bucket.Count);
             fileHeaders = new();
 
             fileList = new(numFiles);
             root = new BinderVirtualDirectory("");
 
-            //build file caches
-            foreach (var b in binders)
+            //build file cache
+            foreach (var h in binder.EnumerateFiles())
             {
-                foreach (var h in b.EnumerateFiles())
+                BinderVirtualFile f;
+                if (this.dictionary.GetPath(h.FileNameHash, out string? p))
                 {
-                    BinderVirtualFile f;
-                    if (this.dictionary.GetPath(h.FileNameHash, out string? p))
+                    p = p.ToLower();
+                    fileHeaders.Add((p, h));
+                    if (this.files.ContainsKey(p))
                     {
-                        p = p.ToLower();
-                        fileHeaders.Add((p, h));
-                        if (this.files.ContainsKey(p))
-                        {
-                            Console.WriteLine($"Duplicate file for name \"{p}\"!");
-                            continue;
-                        }
-                        string[] sp = p.Trim('/').Split('/');
-                        string fileName = sp[^1];
-                        f = new(fileName, h, b.Bdt, b.BdtMmf);
-                        files.Add(p!, f);
-                        var currDir = root;
-                        foreach (string dirName in sp[..^1])
-                        {
-                            if (currDir.directories.TryGetValue(dirName, out var d))
-                            {
-                                currDir = d;
-                            }
-                            else
-                            {
-                                var tmp = new BinderVirtualDirectory(dirName);
-                                currDir.directories.Add(dirName, tmp);
-                                currDir = tmp;
-                            }
-                        }
-                        currDir.files.Add(fileName, f);
+                        Console.WriteLine($"Duplicate file for name \"{p}\"!");
+                        continue;
                     }
-                    else
+                    string[] sp = p.Trim('/').Split('/');
+                    string fileName = sp[^1];
+                    f = new(fileName, h, binder.Bdt, binder.BdtMmf);
+                    files.Add(p!, f);
+                    var currDir = root;
+                    foreach (string dirName in sp[..^1])
                     {
-                        f = new(null, h, b.Bdt, b.BdtMmf);
-                        Console.WriteLine($"Couldn't find name for file hash: {h.FileNameHash}");
+                        if (currDir.directories.TryGetValue(dirName, out var d))
+                        {
+                            currDir = d;
+                        }
+                        else
+                        {
+                            var tmp = new BinderVirtualDirectory(dirName);
+                            currDir.directories.Add(dirName, tmp);
+                            currDir = tmp;
+                        }
                     }
-                    fileList.Add(f);
+                    currDir.files.Add(fileName, f);
                 }
+                else
+                {
+                    f = new(null, h, binder.Bdt, binder.BdtMmf);
+                    Debug.WriteLine($"Couldn't find name for file hash: {h.FileNameHash}");
+                }
+
+                fileList.Add(f);
             }
-        }
-
-        public static BhdDictionary GetDictionaryForGame(Game game)
-            => game switch
-            {
-                Game.DES => throw new NotImplementedException(),
-                Game.DS1 => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","DarkSoulsDictionary.txt")), BHD5.Game.DarkSouls1),
-                Game.DS1R => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","DarkSoulsDictionary.txt")), BHD5.Game.DarkSouls1),
-                Game.DS2S => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","DarkSouls2Dictionary.txt")), BHD5.Game.DarkSouls2),
-                Game.DS3 => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","DarkSouls3Dictionary.txt")), BHD5.Game.DarkSouls3),
-                Game.BB => throw new NotImplementedException(),
-                Game.SDT => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","SekiroDictionary.txt")), BHD5.Game.DarkSouls3),
-                Game.ER => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","EldenRingDictionary.txt")), BHD5.Game.EldenRing),
-                Game.NR => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","EldenRingNightreignDictionary.txt")), BHD5.Game.EldenRing),
-                Game.AC6 => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","ArmoredCore6Dictionary.txt")), BHD5.Game.EldenRing),
-                Game.DS2 => new(File.ReadAllText(Path.Join("Assets","UXM Dictionaries","ScholarDictionary.txt")), BHD5.Game.DarkSouls2),
-                _ => throw new ArgumentOutOfRangeException(nameof(game), game, null)
-            };
-
-        /// <summary>
-        /// Constructs an ArchiveBinderVirtualFileSystem from a game folder and the type of game.
-        /// Handles decryption of the bhds, if necessary.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <param name="game"></param>
-        /// <returns></returns>
-        public static ArchiveBinderVirtualFileSystem FromGameFolder(string folder, Game game)
-        {
-            BhdDictionary dictionary = GetDictionaryForGame(game);
-            var binders = BinderArchive.FindBHDs(folder, game)
-                .Select(s => new BinderArchive(s, s.Replace(".bhd5", ".bdt").Replace(".bhd", ".bdt"), game))
-                .ToArray();
-            return new(binders, dictionary);
         }
 
         public override bool TryGetFile(VirtualFileSystem.VFSPath path, [MaybeNullWhen(false)] out VirtualFile file)
@@ -174,10 +141,7 @@ namespace Andre.IO.VFS
         public override void Dispose()
         {
             base.Dispose();
-            foreach (var a in binders)
-            {
-                a.Dispose();
-            }
+            binder.Dispose();
         }
 
         public class BinderVirtualFile(string? name, BHD5.FileHeader fileHeader, FileStream bdt, MemoryMappedFile btfMmf) : VirtualFile
@@ -190,7 +154,7 @@ namespace Andre.IO.VFS
 
             public override Memory<byte> GetData() => FileHeader.ReadFileThreaded(Bdt);
             public override IMemoryOwner<byte> MemoryMapData()
-                => fileHeader.GetFile(btfMmf);
+                => FileHeader.GetFile(btfMmf);
         }
 
         public class BinderVirtualDirectory(string name) : VirtualDirectory

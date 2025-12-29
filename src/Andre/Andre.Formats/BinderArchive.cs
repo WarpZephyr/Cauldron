@@ -20,97 +20,6 @@ namespace Andre.Formats
 
         public bool BhdWasEncrypted { get; }
 
-        public static readonly string[] DarkSoulsArchiveNames =
-        [
-            "dvdbnd0",
-            "dvdbnd1",
-            "dvdbnd2",
-            "dvdbnd3",
-        ];
-
-        public static readonly string[] DarkSouls2ArchiveNames =
-        [
-            "GameDataEbl",
-            "LqChrEbl",
-            "LqMapEbl",
-            "LqObjEbl",
-            "LqPartsEbl",
-        ];
-
-        public static readonly string[] DarkSouls3ArchiveNames =
-        [
-            "Data1",
-            "Data2",
-            "Data3",
-            "Data4",
-            "Data5",
-            "DLC1",
-            "DLC2",
-        ];
-
-        public static readonly string[] SekiroArchiveNames =
-        [
-
-            "Data1",
-            "Data2",
-            "Data3",
-            "Data4",
-            "Data5",
-        ];
-
-        public static readonly string[] EldenRingArchiveNames =
-        [
-            "Data0",
-            "Data1",
-            "Data2",
-            "Data3",
-            "DLC",
-            Path.Join("sd", "sd"),
-            Path.Join("sd", "sd_dlc02"),
-        ];
-
-        public static readonly string[] ArmoredCore6ArchiveNames =
-        [
-            "Data0",
-            "Data1",
-            "Data2",
-            "Data3",
-            Path.Join("sd", "sd"),
-        ];
-
-        public static readonly string[] NightreignArchiveNames =
-        [
-            "data0",
-            "data1",
-            "data2",
-            "data3",
-            "dlc01",
-            Path.Join("sd", "sd"),
-            Path.Join("sd", "sd_dlc01"),
-        ];
-
-        public static string[] GetArchiveNames(Game game)
-            => game switch
-            {
-                Game.DES => throw new NotImplementedException(),
-                Game.DS1 => DarkSoulsArchiveNames,
-                Game.DS1R => DarkSoulsArchiveNames,
-                Game.DS2S => DarkSouls2ArchiveNames,
-                Game.DS3 => DarkSouls3ArchiveNames,
-                Game.BB => throw new NotImplementedException(),
-                Game.SDT => SekiroArchiveNames,
-                Game.ER => EldenRingArchiveNames,
-                Game.AC6 => ArmoredCore6ArchiveNames,
-                Game.DS2 => DarkSouls2ArchiveNames,
-                Game.NR => NightreignArchiveNames,
-                _ => throw new ArgumentOutOfRangeException(nameof(game), game, null)
-            };
-
-        public static IEnumerable<string> FindBHDs(string gameRoot, Game game)
-            => GetArchiveNames(game)
-                .Select(archive => Path.Combine(gameRoot, archive + (game == Game.DS1 ? ".bhd5" : ".bhd")))
-                .Where(File.Exists);
-
         public BinderArchive(BHD5 bhd, FileStream bdt, MemoryMappedFile bdtMmf, bool wasEncrypted = false)
         {
             this.bhd = bhd;
@@ -144,19 +53,18 @@ namespace Andre.Formats
             return sig != "BHD5";
         }
 
-        public static byte[] Decrypt(Memory<byte> encryptedBhd, string bhdPath, Game game)
+        public static byte[] Decrypt(Memory<byte> encryptedBhd, string bhdPath, string decryptionKey)
         {
-            return NativeRsa.Decrypt(encryptedBhd, ArchiveKeys.GetKey(bhdPath, game), ThreadsForDecryption);
+            return NativeRsa.Decrypt(encryptedBhd, decryptionKey, ThreadsForDecryption);
         }
 
-        public static byte[] Decrypt(string bhdPath, Game game)
+        public static byte[] Decrypt(string bhdPath, string decryptionKey)
         {
-            return SoulsFormats.Util.CryptographyUtility.DecryptRsa(bhdPath, ArchiveKeys.GetKey(bhdPath, game)).ToArray();
+            return SoulsFormats.Util.CryptographyUtility.DecryptRsa(bhdPath, decryptionKey).ToArray();
         }
 
-        public BinderArchive(string bhdPath, string bdtPath, Game game)
+        public BinderArchive(string bhdPath, string bdtPath, BHD5.Game game, bool isEncrypted, string? decryptionKey)
         {
-
             var fs = new FileStream(bhdPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var file = MemoryMappedFile.CreateFromFile(fs, null, 0, MemoryMappedFileAccess.Read,
                 HandleInheritability.None, leaveOpen: false);
@@ -164,24 +72,36 @@ namespace Andre.Formats
 
             if (IsBhdEncrypted(accessor.Memory))
             {
-                //encrypted
+                // Encrypted
+                if (!isEncrypted)
+                {
+                    // Handle when invalid or encrypted archives are passed when the parameter says otherwise by doing this
+                    throw new ArgumentException("Archive was determined to be possibly encrypted, but the constructor was told otherwise, is the archive valid?", nameof(isEncrypted));
+                }
+
+                if (string.IsNullOrWhiteSpace(decryptionKey))
+                {
+                    throw new ArgumentException("Archive was determined to be encrypted but no valid key was passed to decrypt it with.", nameof(decryptionKey));
+                }
+
 #if DEBUG
-                Console.WriteLine($"Decrypting {Path.GetFileName(bhdPath)}");
+                Debug.WriteLine($"Decrypting {Path.GetFileName(bhdPath)}");
 #endif
                 byte[] decrypted;
 #if WINDOWS
-                decrypted = Decrypt(accessor.Memory, bhdPath, game);
+                decrypted = Decrypt(accessor.Memory, bhdPath, decryptionKey);
 #else
-                decrypted = Decrypt(bhdPath, game);
+                decrypted = Decrypt(bhdPath, encryptionKey);
 #endif
-                bhd = BHD5.Read(decrypted, game.AsBhdGame()!.Value);
+                bhd = BHD5.Read(decrypted, game);
                 BhdWasEncrypted = true;
             }
             else
             {
-                bhd = BHD5.Read(accessor.Memory, game.AsBhdGame()!.Value);
+                bhd = BHD5.Read(accessor.Memory, game);
                 BhdWasEncrypted = true;
             }
+
             Bdt = File.OpenRead(bdtPath);
             BdtMmf = MemoryMappedFile.CreateFromFile(Bdt, null, 0, MemoryMappedFileAccess.Read,
                 HandleInheritability.None, true);

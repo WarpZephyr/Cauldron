@@ -112,6 +112,7 @@ public class FileItemView
             
             ImGui.BeginChild("internalFileSection", sectionSize, ImGuiChildFlags.Borders);
 
+            int fileIndex = 0;
             foreach (var file in Editor.Selection.InternalFileList)
             {
                 var filename = file;
@@ -120,6 +121,7 @@ public class FileItemView
                 {
                     if (!filename.Contains(_internalFileSearch))
                     {
+                        fileIndex++;
                         continue;
                     }
                 }
@@ -130,10 +132,12 @@ public class FileItemView
                     selected = true;
                 }
 
-                if (ImGui.Selectable($"{filename}##fileEntry_{file.GetHashCode()}", selected))
+                if (ImGui.Selectable($"{filename}##fileEntry_{fileIndex}", selected))
                 {
                     Editor.Selection.SelectedInternalFile = file;
                 }
+
+                fileIndex++;
             }
 
             ImGui.EndChild();
@@ -152,7 +156,7 @@ public class FileItemView
             );
 
             ImGui.BeginChild("internalTexFileSection", sectionSize, ImGuiChildFlags.Borders);
-
+            int fileIndex = 0;
             foreach (var texEntry in Editor.Selection.InternalTextureList)
             {
                 var containerFile = texEntry.Key;
@@ -161,15 +165,20 @@ public class FileItemView
                 if (!LocatorUtils.IsTPF(Editor.Selection.SelectedVfsFile.Path))
                 {
                     if (containerFile != Editor.Selection.SelectedInternalFile)
+                    {
+                        fileIndex++;
                         continue;
+                    }
                 }
 
+                int texIndex = 0;
                 foreach (var tex in texNames)
                 {
                     if (_internalTexFileSearch != "")
                     {
                         if (!tex.Contains(_internalTexFileSearch))
                         {
+                            texIndex++;
                             continue;
                         }
                     }
@@ -180,11 +189,15 @@ public class FileItemView
                         selected = true;
                     }
 
-                    if (ImGui.Selectable($"{tex}##fileTexEntry_{tex.GetHashCode()}", selected))
+                    if (ImGui.Selectable($"{tex}##fileTexEntry_{fileIndex}_{texIndex}", selected))
                     {
                         Editor.Selection.SelectedInternalTexFile = tex;
                     }
+
+                    texIndex++;
                 }
+
+                fileIndex++;
             }
 
             ImGui.EndChild();
@@ -294,7 +307,7 @@ public class FileItemView
 
         if (binderType is ResourceContainerType.BND)
         {
-            if (Project.ProjectType is ProjectType.DS1 or ProjectType.DS1R or ProjectType.DES)
+            if (Project.ProjectType is ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
             {
                 try
                 {
@@ -394,9 +407,7 @@ public class FileItemView
 
             if (bhd.Length != 0 && bdt.Length != 0)
             {
-                if (Project.ProjectType is ProjectType.DES
-                    or ProjectType.DS1
-                    or ProjectType.DS1R)
+                if (Project.ProjectType is ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
                 {
                     var binder = new BXF3Reader(bhd, bdt);
                     foreach (var file in binder.Files)

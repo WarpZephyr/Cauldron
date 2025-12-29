@@ -1,0 +1,186 @@
+{
+  "Entries": [
+    {
+      "Archive": "",
+      "Path": "/default.xex",
+      "Folder": "/",
+      "Filename": "default",
+      "Extension": "xex"
+    },
+    {
+      "Archive": "",
+      "Path": "/NxeArt",
+      "Folder": "/",
+      "Filename": "NxeArt",
+      "Extension": ""
+    },
+    {
+      "Archive": "",
+      "Path": "/$SystemUpdate/su20076000_00000000",
+      "Folder": "/$SystemUpdate",
+      "Filename": "su20076000_00000000",
+      "Extension": ""
+    },
+    {
+      "Archive": "",
+      "Path": "/$SystemUpdate/system.manifest",
+      "Folder": "/$SystemUpdate",
+      "Filename": "system",
+      "Extension": "manifest"
+    },
+    {
+      "Archive": "",
+      "Path": "/bind/dvdbnd.bdt",
+      "Folder": "/bind",
+      "Filename": "dvdbnd",
+      "Extension": "bdt"
+    },
+    {
+      "Archive": "",
+      "Path": "/bind/dvdbnd5.bhd",
+      "Folder": "/bind",
+      "Filename": "dvdbnd5",
+      "Extension": "bhd"
+    },
+    {
+      "Archive": "",
+      "Path": "/bind/script.bdt",
+      "Folder": "/bind",
+      "Filename": "script",
+      "Extension": "bdt"
+    },
+    {
+      "Archive": "",
+      "Path": "/bind/script.bhd",
+      "Folder": "/bind",
+      "Filename": "script",
+      "Extension": "bhd"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/acv_opening.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "acv_opening",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/btu_adv_move_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "btu_adv_move_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/btu_boost_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "btu_boost_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/chap00_movie.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "chap00_movie",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/inisettings.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "inisettings",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/inisettings_bg.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "inisettings_bg",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/moh_emblem.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "moh_emblem",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_adv_move.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_adv_move",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_adv_move2.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_adv_move2",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_attack.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_attack",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_boost.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_boost",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_garage_p2_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_garage_p2_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_garage_p_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_garage_p_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_mode2_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_mode2_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_mode_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_mode_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_move.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_move",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_recon_us.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_recon_us",
+      "Extension": "wmv"
+    },
+    {
+      "Archive": "",
+      "Path": "/movie/jp/tu_scan.wmv",
+      "Folder": "/movie/jp",
+      "Filename": "tu_scan",
+      "Extension": "wmv"
+    }
+  ]
+}

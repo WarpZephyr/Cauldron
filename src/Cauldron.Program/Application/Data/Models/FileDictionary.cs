@@ -1,15 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace StudioCore.Application;
 
+/// <summary>
+/// A dictionary of files.
+/// </summary>
 public class FileDictionary
 {
+    /// <summary>
+    /// The entries describing files in this dictionary.
+    /// </summary>
     public List<FileDictionaryEntry> Entries { get; set; }
 }
+
+/// <summary>
+/// A file dictionary entry describing information about a file.
+/// </summary>
 public class FileDictionaryEntry
 {
     /// <summary>

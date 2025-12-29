@@ -229,7 +229,7 @@ public static class ModelLocator
         ret.AssetName = chrId;
         ret.AssetArchiveVirtualPath = $@"chr/{chrContainerId}/model";
 
-        if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2 or ProjectType.ACV or ProjectType.ACVD)
+        if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2 or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
             ret.AssetVirtualPath = $@"chr/{chrContainerId}/model/{chrId}.flv";
         else
             ret.AssetVirtualPath = $@"chr/{chrContainerId}/model/{chrId}.flver";
@@ -241,6 +241,8 @@ public static class ModelLocator
         }
         else if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2)
             ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "chr", $"{chrId}.bnd"));
+        else if (project.ProjectType is ProjectType.ACFA)
+            ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "ene", chrId, $"{chrId}_m.bnd"));
         else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
             ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "ene", chrId, $"{chrId}_m.bnd.dcx"));
         else if (project.ProjectType is ProjectType.DES)
@@ -279,9 +281,13 @@ public static class ModelLocator
         {
             ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "obj", $"{objId}.bnd"));
         }
-        else if (project.ProjectType is ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+        else if (project.ProjectType is ProjectType.ACFA)
         {
             ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "obj", objId, $"{objId}_m.bnd"));
+        }
+        else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
+        {
+            ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "obj", objId, $"{objId}_m.bnd.dcx"));
         }
         else if (project.ProjectType is ProjectType.ER or ProjectType.NR)
         {

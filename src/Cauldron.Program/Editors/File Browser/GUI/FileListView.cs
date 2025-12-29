@@ -57,17 +57,16 @@ public class FileListView
         ImGui.End();
     }
 
-    /// <summary>
-    /// Ignore the bdt files since clicking them crashes Cauldron, and the bucket viewing is done via the bhd.
-    /// </summary>
-    private List<string> ignoredFiles = new()
-    {
-        ".bdt"
-    };
+    private readonly static List<string> ignoredFiles =
+    [
+        "bdt", // Ignore the bdt files since clicking them crashes Cauldron, and the bucket viewing is done via the bhd.
+    ];
 
     private void Traverse(FsEntry e, string parentIdStr)
     {
         var extension = Path.GetExtension(e.Name);
+        if (!string.IsNullOrEmpty(extension))
+            extension = extension[1..];
         if (ignoredFiles.Contains(extension))
             return;
 
@@ -246,10 +245,18 @@ public class FileListView
             // Files
             foreach (var file in folder.Files)
             {
+                if (ignoredFiles.Contains(file.Extension.ToLowerInvariant()))
+                    continue;
+
                 string filename = $"{file.Filename}.{file.Extension}";
+                if (file.Path.EndsWith(".sdat", StringComparison.InvariantCultureIgnoreCase))
+                    filename = $"{filename}.sdat";
+                else if (file.Path.EndsWith(".edat", StringComparison.InvariantCultureIgnoreCase))
+                    filename = $"{filename}.edat";
+
                 bool fileMatches =
-                    string.IsNullOrWhiteSpace(_search) ||
-                    filename.Contains(_search, StringComparison.OrdinalIgnoreCase);
+                        string.IsNullOrWhiteSpace(_search) ||
+                        filename.Contains(_search, StringComparison.OrdinalIgnoreCase);
 
                 if (!fileMatches)
                     continue;

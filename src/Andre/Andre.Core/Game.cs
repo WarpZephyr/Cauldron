@@ -13,6 +13,8 @@ namespace Andre.Core
         BB, // Bloodborne
         SDT, // Sekiro: Shadows Die Twice
         ER, // Elden Ring
+        ACFA, // Armored Core: For Answer
+        ACV, // Armored Core V
         ACVD, // Armored Core: Verdict Day
         AC6, // Armored Core VI: Fires of Rubicon
         DS2, // Dark Souls II
@@ -27,6 +29,7 @@ namespace Andre.Core
             {
                 Game.DS1 => BHD5.Game.DarkSouls1,
                 Game.DS1R => BHD5.Game.DarkSouls1,
+                Game.ACV => BHD5.Game.DarkSouls1,
                 Game.ACVD => BHD5.Game.DarkSouls1,
                 Game.DS2 => BHD5.Game.DarkSouls2,
                 Game.DS2S => BHD5.Game.DarkSouls2,
@@ -36,6 +39,7 @@ namespace Andre.Core
                 Game.AC6 => BHD5.Game.EldenRing,
                 Game.BB => null,
                 Game.DES => null,
+                Game.ACFA => null,
                 Game.NR => BHD5.Game.EldenRing,
                 _ => null
             };

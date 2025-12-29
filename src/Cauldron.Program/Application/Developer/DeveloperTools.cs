@@ -14,7 +14,8 @@ public class DeveloperTools
     public bool ShowFlverMaterialLayoutDumper;
 
     public bool ShowDokuWikiGenerator;
-    public bool ShowFileDictionaryGenerator;
+    public bool ShowUxmFileDictionaryGenerator;
+    public bool ShowRootFileDictionaryGenerator;
     public bool ShowWorldMapLayoutGenerator;
 
     public bool ShowTest_UniqueParamInsertion;
@@ -66,9 +67,13 @@ public class DeveloperTools
                     {
                         ShowDokuWikiGenerator = !ShowDokuWikiGenerator;
                     }
-                    if (ImGui.MenuItem($"File Dictionary"))
+                    if (ImGui.MenuItem($"Uxm File Dictionary"))
                     {
-                        ShowFileDictionaryGenerator = !ShowFileDictionaryGenerator;
+                        ShowUxmFileDictionaryGenerator = !ShowUxmFileDictionaryGenerator;
+                    }
+                    if (ImGui.MenuItem($"Root File Dictionary"))
+                    {
+                        ShowRootFileDictionaryGenerator = !ShowRootFileDictionaryGenerator;
                     }
                     if (ImGui.MenuItem($"World Map Layout"))
                     {
@@ -160,11 +165,19 @@ public class DeveloperTools
                 ImGui.End();
             }
         }
-        if (ShowFileDictionaryGenerator)
+        if (ShowUxmFileDictionaryGenerator)
         {
-            if (ImGui.Begin("File Dictionary Generator", ImGuiWindowFlags.None))
+            if (ImGui.Begin("Uxm File Dictionary Generator", ImGuiWindowFlags.None))
             {
-                FileDictionaryGenerator.Display(BaseEditor, BaseEditor.ProjectManager.SelectedProject);
+                FileDictionaryGenerator.DisplayUxmGenerator(BaseEditor, BaseEditor.ProjectManager.SelectedProject);
+                ImGui.End();
+            }
+        }
+        if (ShowRootFileDictionaryGenerator)
+        {
+            if (ImGui.Begin("Root File Dictionary Generator", ImGuiWindowFlags.None))
+            {
+                FileDictionaryGenerator.DisplayRootGenerator(BaseEditor, BaseEditor.ProjectManager.SelectedProject);
                 ImGui.End();
             }
         }

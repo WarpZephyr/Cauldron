@@ -11,6 +11,7 @@ public class LegacyProjectJSON
     public string ProjectName { get; set; }
     public string GameRoot { get; set; }
     public ProjectType GameType { get; set; }
+    public ProjectPlatform GamePlatform { get; set; }
 
     public List<string> PinnedParams { get; set; }
     public Dictionary<string, List<int>> PinnedRows { get; set; }
@@ -27,6 +28,7 @@ public class LegacyProjectJSON
         ProjectName = curProject.ProjectName;
         GameRoot = curProject.DataPath;
         GameType = curProject.ProjectType;
+        GamePlatform = curProject.ProjectPlatform;
 
         PinnedParams = new();
         PinnedRows = new();
