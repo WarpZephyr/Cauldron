@@ -1,9 +1,7 @@
 # Cauldron
-Cauldron is a modding tool for Armored Core: Verdict Day.  
+Cauldron is a modding tool for Armored Core: For Answer, Armored Core V, and Armored Core: Verdict Day.  
 Support may be added for:  
 Armored Core 4  
-Armored Core: For Answer  
-Armored Core V  
 
 [![Github Release](https://img.shields.io/github/release-pre/WarpZephyr/Cauldron)](https://github.com/WarpZephyr/Cauldron/releases/latest)
 [![Github All Releases](https://img.shields.io/github/downloads/WarpZephyr/Cauldron/total)](https://github.com/WarpZephyr/Cauldron/releases/latest)
