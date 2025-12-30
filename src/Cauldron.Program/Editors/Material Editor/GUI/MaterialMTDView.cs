@@ -61,7 +61,36 @@ public class MaterialMTDView
                 ImGui.TableSetColumnIndex(2);
 
                 // Value
-                ImGui.Text($"{param.Value}");
+                switch (param.Type)
+                {
+                    case MTD.ParamType.Float2:
+                        if (param.Value is float[] float2)
+                            ImGui.Text($"{float2[0]}, {float2[1]}");
+                        else
+                            ImGui.Text($"<invalid>");
+                        break;
+                    case MTD.ParamType.Float3:
+                        if (param.Value is float[] float3)
+                            ImGui.Text($"{float3[0]}, {float3[1]}, {float3[2]}");
+                        else
+                            ImGui.Text($"<invalid>");
+                        break;
+                    case MTD.ParamType.Float4:
+                        if (param.Value is float[] float4)
+                            ImGui.Text($"{float4[0]}, {float4[1]}, {float4[2]}, {float4[3]}");
+                        else
+                            ImGui.Text($"<invalid>");
+                        break;
+                    case MTD.ParamType.Int2:
+                        if (param.Value is int[] int2)
+                            ImGui.Text($"{int2[0]}, {int2[1]}");
+                        else
+                            ImGui.Text($"<invalid>");
+                        break;
+                    default:
+                        ImGui.Text($"{param.Value}");
+                        break;
+                }
             }
 
             ImGui.EndTable();

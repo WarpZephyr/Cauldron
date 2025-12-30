@@ -82,9 +82,9 @@ public class MaterialSourceList
                         var key = filteredEntries[i];
                         var curWrapper = Project.MaterialData.PrimaryBank.MTDs[key];
 
-                        var displayName = $"{key.Filename}";
+                        var displayName = $"{key.Path}";
 
-                        if (ImGui.Selectable($"{displayName}##mtdEntry_{key.Filename}{i}", key == Editor.Selection.SelectedBinderEntry, ImGuiSelectableFlags.AllowDoubleClick))
+                        if (ImGui.Selectable($"{displayName}##mtdEntry_{key.Path}{i}", key == Editor.Selection.SelectedBinderEntry, ImGuiSelectableFlags.AllowDoubleClick))
                         {
                             Editor.Selection.SelectedBinderEntry = key;
                             Editor.Selection.MTDWrapper = curWrapper;

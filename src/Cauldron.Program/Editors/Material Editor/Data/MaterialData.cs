@@ -52,7 +52,16 @@ public class MaterialData
             .ToList();
         }
 
-        // ACV and ACVD has them as .bnd files
+        // ACFA has them as loose files
+        if (Project.ProjectType is ProjectType.ACFA)
+        {
+            MTD_Files.Entries = Project.FileDictionary.Entries
+            .Where(e => e.Folder.StartsWith("/material"))
+            .Where(e => e.Extension == "mtd")
+            .ToList();
+        }
+
+        // ACV and ACVD have them as .bnd files
         if (Project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
         {
             MTD_Files.Entries = Project.FileDictionary.Entries

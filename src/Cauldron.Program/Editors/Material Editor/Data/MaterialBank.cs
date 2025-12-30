@@ -1,4 +1,5 @@
 ﻿using Andre.IO.VFS;
+using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using SoulsFormats;
 using StudioCore.Application;
@@ -100,6 +101,7 @@ public class MTDWrapper
     public ProjectEntry Project;
     public VirtualFileSystem TargetFS;
     public string Name { get; set; }
+    public string Extension { get; set; }
     public string Path { get; set; }
     public Dictionary<string, MTD> Entries { get; set; } = new();
 
@@ -109,6 +111,7 @@ public class MTDWrapper
         Project = project;
         TargetFS = targetFS;
         Name = dictEntry.Filename;
+        Extension = dictEntry.Extension;
         Path = dictEntry.Path;
     }
 
@@ -118,11 +121,18 @@ public class MTDWrapper
 
         try
         {
-            var binderData = TargetFS.ReadFileOrThrow(Path);
-
-            if (Project.ProjectType is ProjectType.DES or ProjectType.DS1 or ProjectType.DS1R or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+            var fileData = TargetFS.ReadFileOrThrow(Path);
+            if (Extension == "mtd")
             {
-                var binder = BND3.Read(binderData);
+                var mtd = MTD.Read(fileData);
+                if (!Entries.TryAdd(Name, mtd))
+                {
+                    Entries[Name] = mtd;
+                }
+            }
+            else if (Project.ProjectType is ProjectType.DES or ProjectType.DS1 or ProjectType.DS1R or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+            {
+                var binder = BND3.Read(fileData);
 
                 foreach (var entry in binder.Files)
                 {
@@ -132,13 +142,9 @@ public class MTDWrapper
                         {
                             var mtd = MTD.Read(entry.Bytes);
 
-                            if (Entries.ContainsKey(entry.Name))
+                            if (!Entries.TryAdd(entry.Name, mtd))
                             {
                                 Entries[entry.Name] = mtd;
-                            }
-                            else
-                            {
-                                Entries.Add(entry.Name, mtd);
                             }
                         }
                         catch (Exception e)
@@ -151,7 +157,7 @@ public class MTDWrapper
             }
             else
             {
-                var binder = BND4.Read(binderData);
+                var binder = BND4.Read(fileData);
 
                 foreach (var entry in binder.Files)
                 {
@@ -192,12 +198,24 @@ public class MTDWrapper
     {
         await Task.Yield();
 
-        if (Project.ProjectType is ProjectType.DES or ProjectType.DS1 or ProjectType.DS1R)
+        if (Extension == "mtd")
+        {
+            try
+            {
+                Project.ProjectFS.WriteFile(editor.Selection.SelectedBinderEntry.Path, editor.Selection.SelectedMTD.Write());
+            }
+            catch (Exception e)
+            {
+                TaskLogs.AddLog($"[{Project.ProjectName}:Material Editor] Failed to write {Path}", LogLevel.Error, LogPriority.High, e);
+                return false;
+            }
+        }
+        else if (Project.ProjectType is ProjectType.DES or ProjectType.DS1 or ProjectType.DS1R or ProjectType.ACV or ProjectType.ACVD)
         {
             try
             {
                 var binderData = TargetFS.ReadFileOrThrow(Path);
-                var binder = BND4.Read(binderData);
+                var binder = BND3.Read(binderData);
 
                 foreach (var entry in binder.Files)
                 {
