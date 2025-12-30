@@ -1,5 +1,4 @@
 ﻿using Andre.IO.VFS;
-using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using SoulsFormats;
 using StudioCore.Application;
