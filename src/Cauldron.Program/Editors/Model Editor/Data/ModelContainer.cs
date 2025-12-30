@@ -69,17 +69,6 @@ public class ModelContainer : ObjectContainer
 
     public void Load(FLVER2 flver, ModelWrapper wrapper)
     {
-        // Dummies
-        foreach (var entry in flver.Dummies)
-        {
-            var newObject = new ModelEntity(Editor, this, entry, ModelEntityType.Dummy);
-            AssignDummyDrawable(newObject, wrapper);
-
-            Dummies.Add(newObject);
-            Objects.Add(newObject);
-            RootObject.AddChild(newObject);
-        }
-
         // Materials
         foreach (var entry in flver.Materials)
         {
@@ -99,51 +88,53 @@ public class ModelContainer : ObjectContainer
         //}
 
         // Nodes
-        void AddNode(FLVER.Node entry, ModelEntity parentObject)
+        foreach (var entry in flver.Nodes)
         {
             var newObject = new ModelEntity(Editor, this, entry, ModelEntityType.Node);
-            parentObject.AddChild(newObject);
-
             AssignNodeDrawable(newObject, wrapper);
 
             Nodes.Add(newObject);
             Objects.Add(newObject);
+        }
 
-            // Move onto the children of this node
-            if (entry.FirstChildIndex > -1)
+        // Nodes - Parenting
+        foreach (var ent in Nodes)
+        {
+            var curNode = (FLVER.Node)ent.WrappedObject;
+
+            // Parent the node to its parent bone (if applicable)
+            if (curNode.ParentIndex != -1)
             {
-                AddNode(flver.Nodes[entry.FirstChildIndex], newObject);
+                var parNode = Nodes[curNode.ParentIndex];
+                parNode.AddChild(ent);
             }
-
-            // Move onto the siblings of this node
-            if (entry.NextSiblingIndex > -1)
+            // Other parent to the root object
+            else
             {
-                AddNode(flver.Nodes[entry.NextSiblingIndex], parentObject);
+                RootObject.AddChild(ent);
             }
         }
 
-        foreach (var entry in flver.Nodes)
+        // Dummies
+        foreach (var entry in flver.Dummies)
         {
-            if (entry.ParentIndex > -1)
-            {
-                // Skip any entries for parents in this top level
-                continue;
-            }
+            var newObject = new ModelEntity(Editor, this, entry, ModelEntityType.Dummy);
+            AssignDummyDrawable(newObject, wrapper);
 
-            var newObject = new ModelEntity(Editor, this, entry, ModelEntityType.Node);
-            AssignNodeDrawable(newObject, wrapper);
-
-            Nodes.Add(newObject);
+            Dummies.Add(newObject);
             Objects.Add(newObject);
-            RootObject.AddChild(newObject);
 
-            // Move onto the children of this node
-            if (entry.FirstChildIndex > -1)
+            // Parent the dummy to its parent bone (if applicable)
+            if (entry.ParentBoneIndex != -1)
             {
-                AddNode(flver.Nodes[entry.FirstChildIndex], newObject);
+                var parNode = Nodes[entry.ParentBoneIndex];
+                parNode.AddChild(newObject);
             }
-
-            // We already handle siblings and other top level bones in this loop
+            // Other parent to the root object
+            else
+            {
+                RootObject.AddChild(newObject);
+            }
         }
 
         // Meshes

@@ -834,11 +834,42 @@ public class Entity : ISelectable, IDisposable
                 t.Position = (Vector3)pos;
             }
 
-            var forward = GetPropertyValue("Forward");
-            var upward = GetPropertyValue("Upward");
-            if (forward != null && upward != null)
+            var forwardObj = GetPropertyValue("Forward");
+            var upwardObj = GetPropertyValue("Upward");
+            var useUpwardVectorObj = GetPropertyValue("UseUpwardVector");
+            if (forwardObj != null && upwardObj != null)
             {
-                t.Rotation = MathUtils.LookRotation((Vector3)forward, (Vector3)upward);
+                Vector3 forward = (Vector3)forwardObj;
+                Vector3 upward = (Vector3)upwardObj;
+                if (useUpwardVectorObj != null)
+                {
+                    bool useUpwardVector = (bool)useUpwardVectorObj;
+                    if (!useUpwardVector)
+                    {
+                        // TODO: Figure out dummy rotation
+                        var trueUp = new Vector3(0f, 1f, 0f);
+                        var trueDown = new Vector3(0f, -1f, 0f);
+                        var trueForward = new Vector3(0f, 0f, -1f);
+                        var trueBackward = new Vector3(0f, 0f, 1f);
+                        var trueLeft = new Vector3(-1f, 0f, 0f);
+                        var trueRight = new Vector3(1f, 0f, 0f);
+
+                        upward = trueUp;
+                        if (Vector3.Abs(forward) == Vector3.Abs(upward))
+                        {
+                            if (forward == trueUp)
+                            {
+                                upward = trueBackward;
+                            }
+                            else if (forward == trueDown)
+                            {
+                                upward = trueForward;
+                            }
+                        }
+                    }
+                }
+
+                t.Rotation = MathUtils.LookRotation(forward, upward);
             }
         }
         else if (WrappedObject is FLVER.Node)
