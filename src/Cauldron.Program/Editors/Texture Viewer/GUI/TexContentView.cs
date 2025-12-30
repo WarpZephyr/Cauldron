@@ -1,6 +1,7 @@
 ﻿using Hexa.NET.ImGui;
 using StudioCore.Application;
 using StudioCore.Renderer;
+using System.Collections.Generic;
 
 namespace StudioCore.Editors.TextureViewer;
 
@@ -29,14 +30,23 @@ public class TexContentView
         {
             int index = 0;
 
+            var nameCounts = new Dictionary<string, int>();
             foreach (var entry in Editor.Selection.SelectedTpf.Textures)
             {
                 if (Editor.Filters.IsTextureFilterMatch(entry.Name))
                 {
                     var displayName = entry.Name;
+                    if (!nameCounts.TryAdd(displayName, 1))
+                    {
+                        int nameCount = nameCounts[displayName];
+                        displayName = $"{displayName} ({nameCount})";
+
+                        nameCount++;
+                        nameCounts[displayName] = nameCount;
+                    }
 
                     var isSelected = false;
-                    if (Editor.Selection.SelectedTextureKey == entry.Name)
+                    if (Editor.Selection.SelectedTextureKey == displayName)
                     {
                         isSelected = true;
                     }
@@ -44,7 +54,7 @@ public class TexContentView
                     // Texture row
                     if (ImGui.Selectable($@"{displayName}##Tex{index}", isSelected))
                     {
-                        Editor.Selection.SelectTextureEntry(entry.Name, entry);
+                        Editor.Selection.SelectTextureEntry(displayName, entry);
                         TargetIndex = index;
                         LoadTexture = true;
                     }
@@ -53,7 +63,7 @@ public class TexContentView
                     if (ImGui.IsItemHovered() && Editor.Selection.SelectTexture)
                     {
                         Editor.Selection.SelectTexture = false;
-                        Editor.Selection.SelectTextureEntry(entry.Name, entry);
+                        Editor.Selection.SelectTextureEntry(displayName, entry);
                         TargetIndex = index;
                         LoadTexture = true;
                     }

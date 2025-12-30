@@ -1988,9 +1988,6 @@ public class FlverResource : IResource, IDisposable
         if (FlverDeS == null)
             return false;
 
-        if (GPUMaterials == null)
-            return false;
-
         if (al == AccessLevel.AccessFull || al == AccessLevel.AccessGPUOptimizedOnly)
         {
             GPUMeshes = new FlverSubmesh[FlverDeS.Meshes.Count()];
@@ -2028,6 +2025,9 @@ public class FlverResource : IResource, IDisposable
 
             BoneTransforms.Clear();
         }
+
+        if (GPUMaterials == null)
+            return false;
 
         if (GPUMaterials.Any(e => e.GetNormalWBoneTransform()))
         {

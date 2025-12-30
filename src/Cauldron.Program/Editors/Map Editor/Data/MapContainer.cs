@@ -24,10 +24,6 @@ public class MapContainer : ObjectContainer
     [XmlIgnore]
     private MapEditorScreen Editor;
 
-    // This keeps all models that exist when loading a map, so that saves
-    // can be byte perfect
-    private readonly Dictionary<string, IMsbModel> LoadedModels;
-
     public MapContentLoadState LoadState = MapContentLoadState.Unloaded;
 
     [XmlIgnore]
@@ -64,8 +60,6 @@ public class MapContainer : ObjectContainer
         Name = mapid;
 
         LightAtlasResolver = new LightAtlasResolver(Editor, Editor.Project, this);
-
-        LoadedModels = new();
 
         BTLParents = new();
         LightAtlasParents = new();
@@ -109,10 +103,7 @@ public class MapContainer : ObjectContainer
     {
         foreach (Entity obj in Objects)
         {
-            if (obj != null)
-            {
-                obj.Dispose();
-            }
+            obj?.Dispose();
         }
     }
 

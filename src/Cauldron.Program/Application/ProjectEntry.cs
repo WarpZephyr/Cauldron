@@ -953,7 +953,14 @@ public class ProjectEntry
                     result = false;
             }
 
-            VanillaFS = new CompoundVirtualFileSystem([VanillaBinderFS, VanillaRealFS]);
+            if (VanillaBinderFS != EmptyVirtualFileSystem.Instance)
+            {
+                VanillaFS = new CompoundVirtualFileSystem([VanillaBinderFS, VanillaRealFS]);
+            }
+            else
+            {
+                VanillaFS = VanillaRealFS;
+            }
         }
         else
         {
@@ -1133,7 +1140,11 @@ public class ProjectEntry
             }
         }
 
-        VanillaBinderFS = new CompoundVirtualFileSystem(binderFSs);
+        if (binderFSs.Count > 0)
+        {
+            VanillaBinderFS = new CompoundVirtualFileSystem(binderFSs);
+        }
+
         return result;
     }
 

@@ -81,8 +81,8 @@
       "Archive": "",
       "Path": "/bind/script.bdt.sdat",
       "Folder": "/bind",
-      "Filename": "script.bdt",
-      "Extension": "sdat"
+      "Filename": "script",
+      "Extension": "bdt"
     },
     {
       "Archive": "",
@@ -95,8 +95,8 @@
       "Archive": "",
       "Path": "/bind/script.bhd.sdat",
       "Folder": "/bind",
-      "Filename": "script.bhd",
-      "Extension": "sdat"
+      "Filename": "script",
+      "Extension": "bhd"
     },
     {
       "Archive": "",

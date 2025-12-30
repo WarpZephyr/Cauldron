@@ -37,6 +37,8 @@ public class TexSourceView
         DisplayFileCategories_BB();
         DisplayFileCategories_SDT();
         DisplayFileCategories_ER();
+        DisplayFileCategories_ACFA();
+        DisplayFileCategories_ACV();
         DisplayFileCategories_ACVD();
         DisplayFileCategories_AC6();
         DisplayFileCategories_NR();
@@ -691,6 +693,88 @@ public class TexSourceView
         }
     }
 
+    public void DisplayFileCategories_ACFA()
+    {
+        if (Project.ProjectType is ProjectType.ACFA)
+        {
+            // Ene
+            DisplayFileSection(
+                "Enemies",
+                TextureViewCategory.Characters,
+                new List<string>() { "/model/ene" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Object
+            DisplayFileSection(
+                "Objects",
+                TextureViewCategory.Assets,
+                new List<string>() { "/model/obj" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Map
+            DisplayFileSection(
+                "Map",
+                TextureViewCategory.Map,
+                new List<string>() { "/model/map" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Parts
+            DisplayFileSection(
+                "Parts",
+                TextureViewCategory.Parts,
+                new List<string>() { "/model/ac" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Garage Parts
+            DisplayFileSection(
+                "Garage Parts",
+                TextureViewCategory.Parts,
+                new List<string>() { "/model/garage" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+        }
+    }
+
+    public void DisplayFileCategories_ACV()
+    {
+        if (Project.ProjectType is ProjectType.ACV)
+        {
+            // Ene
+            DisplayFileSection(
+                "Enemies",
+                TextureViewCategory.Characters,
+                new List<string>() { "/model/ene" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Object
+            DisplayFileSection(
+                "Objects",
+                TextureViewCategory.Assets,
+                new List<string>() { "/model/obj" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Map
+            DisplayFileSection(
+                "Map",
+                TextureViewCategory.Map,
+                new List<string>() { "/model/map" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Parts
+            DisplayFileSection(
+                "Parts",
+                TextureViewCategory.Parts,
+                new List<string>() { "/model/ac" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Image
+            DisplayFileSection(
+                "Image",
+                TextureViewCategory.Other,
+                new List<string>() { "/image" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+        }
+    }
+
     public void DisplayFileCategories_ACVD()
     {
         if (Project.ProjectType is ProjectType.ACVD)
@@ -716,9 +800,16 @@ public class TexSourceView
                 new List<string>() { "/model/map" },
                 Editor.Project.TextureData.PrimaryBank.Entries);
 
-            // Other
+            // Parts
             DisplayFileSection(
-                "Other",
+                "Parts",
+                TextureViewCategory.Parts,
+                new List<string>() { "/model/ac" },
+                Editor.Project.TextureData.PrimaryBank.Entries);
+
+            // Image
+            DisplayFileSection(
+                "Image",
                 TextureViewCategory.Other,
                 new List<string>() { "/image" },
                 Editor.Project.TextureData.PrimaryBank.Entries);

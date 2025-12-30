@@ -124,14 +124,14 @@ public class TextureBank
         if (fileEntry.Extension != "tpf")
         {
             // If already loaded, just ignore
-            if (Entries.Any(e => e.Key.Filename == fileEntry.Filename && e.Value != null))
+            if (Entries.Any(e => e.Key.Path == fileEntry.Path && e.Value != null))
             {
                 return true;
             }
 
-            if (Entries.Any(e => e.Key.Filename == fileEntry.Filename))
+            if (Entries.Any(e => e.Key.Path == fileEntry.Path))
             {
-                var binderEntry = Entries.FirstOrDefault(e => e.Key.Filename == fileEntry.Filename);
+                var binderEntry = Entries.FirstOrDefault(e => e.Key.Path == fileEntry.Path);
 
                 if (binderEntry.Key != null)
                 {
@@ -139,17 +139,17 @@ public class TextureBank
 
                     try
                     {
-                        var taeBinderData = TargetFS.ReadFileOrThrow(key.Path);
+                        var bndData = TargetFS.ReadFileOrThrow(key.Path);
 
                         if (Project.ProjectType is ProjectType.DES or ProjectType.DS1 or ProjectType.DS1R or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
                         {
                             try
                             {
-                                var taeBinder = BND3.Read(taeBinderData);
+                                var bnd = BND3.Read(bndData);
 
                                 var files = new Dictionary<BinderFile, TPF>();
 
-                                foreach (var file in taeBinder.Files)
+                                foreach (var file in bnd.Files)
                                 {
                                     if (!file.Name.Contains(".tpf"))
                                         continue;
@@ -175,7 +175,7 @@ public class TextureBank
 
                                 var newBinderContents = new BinderContents();
                                 newBinderContents.Name = fileEntry.Filename;
-                                newBinderContents.Binder = taeBinder;
+                                newBinderContents.Binder = bnd;
                                 newBinderContents.Files = files;
 
                                 Entries[key] = newBinderContents;
@@ -190,7 +190,7 @@ public class TextureBank
                         {
                             try
                             {
-                                var taeBinder = BND4.Read(taeBinderData);
+                                var taeBinder = BND4.Read(bndData);
 
                                 var files = new Dictionary<BinderFile, TPF>();
 
@@ -254,15 +254,15 @@ public class TextureBank
             }
 
             // Basically creates a fake binder to store the loose TPF in so it fits the standard system.
-            if (Entries.Any(e => e.Key.Filename == fileEntry.Filename))
+            if (Entries.Any(e => e.Key.Path == fileEntry.Path))
             {
-                var tpfEntry = Entries.FirstOrDefault(e => e.Key.Filename == fileEntry.Filename);
+                var tpfEntry = Entries.FirstOrDefault(e => e.Key.Path == fileEntry.Path);
 
                 if (tpfEntry.Key != null)
                 {
                     var key = tpfEntry.Key;
 
-                    if (Project.ProjectType is ProjectType.DES or ProjectType.DS1 or ProjectType.DS1R)
+                    if (Project.ProjectType is ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
                     {
                         var fakeBinder = new BND3();
 

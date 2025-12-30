@@ -83,30 +83,66 @@ public class TextureData
                 .ToList();
         }
 
+        if (Project.ProjectType == ProjectType.ACFA)
+        {
+            objDict.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Filename.EndsWith("_t") && e.Extension == "bnd" && e.Folder.StartsWith("/model/obj"))
+                .ToList();
+        }
+
         if (Project.ProjectType == ProjectType.ACV || Project.ProjectType == ProjectType.ACVD)
         {
             objDict.Entries = Project.FileDictionary.Entries
-                .Where(e => e.Extension == "tpf" && e.Folder.StartsWith("/model/obj"))
+                .Where(e => (e.Extension == "tpf") && e.Folder.StartsWith("/model/obj"))
                 .ToList();
         }
 
         secondaryDicts.Add(objDict);
 
-        // Chr Textures
-        var chrDict = new FileDictionary();
-        chrDict.Entries = Project.FileDictionary.Entries
+        // Ene Textures
+        var eneDict = new FileDictionary();
+        eneDict.Entries = Project.FileDictionary.Entries
             .Where(e => e.Archive != "sd")
             .Where(e => e.Extension == "texbnd")
             .ToList();
 
-        if (Project.ProjectType == ProjectType.ACV || Project.ProjectType == ProjectType.ACVD)
+        if (Project.ProjectType == ProjectType.ACFA)
         {
-            chrDict.Entries = Project.FileDictionary.Entries
-                .Where(e => e.Extension == "tpf" && e.Folder.StartsWith("/model/ene"))
+            eneDict.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Filename.EndsWith("_t") && e.Extension == "bnd" && e.Folder.StartsWith("/model/ene"))
                 .ToList();
         }
 
-        secondaryDicts.Add(chrDict);
+        if (Project.ProjectType == ProjectType.ACV || Project.ProjectType == ProjectType.ACVD)
+        {
+            eneDict.Entries = Project.FileDictionary.Entries
+                .Where(e => (e.Extension == "tpf") && e.Folder.StartsWith("/model/ene"))
+                .ToList();
+        }
+
+        secondaryDicts.Add(eneDict);
+
+        // Map Textures
+        var mapDict = new FileDictionary
+        {
+            Entries = []
+        };
+
+        if (Project.ProjectType == ProjectType.ACFA)
+        {
+            mapDict.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Folder.StartsWith("/model/map") && e.Filename.EndsWith("_t") && e.Extension == "bnd")
+                .ToList();
+        }
+
+        if (Project.ProjectType == ProjectType.ACV || Project.ProjectType == ProjectType.ACVD)
+        {
+            mapDict.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Folder.StartsWith("/model/map") && e.Filename.EndsWith("_htdcx") && e.Extension == "bnd")
+                .ToList();
+        }
+
+        secondaryDicts.Add(mapDict);
 
         // Part Textures
         var partDict = new FileDictionary();
@@ -115,7 +151,23 @@ public class TextureData
             .Where(e => e.Extension == "partsbnd")
             .ToList();
 
-        if (Project.ProjectType == ProjectType.DS2S || Project.ProjectType == ProjectType.DS2)
+        if (Project.ProjectType == ProjectType.ACFA)
+        {
+            partDict.Entries = Project.FileDictionary.Entries
+                .Where(e => (e.Folder.StartsWith("/model/ac/") || e.Folder.StartsWith("/model/garage")) && e.Filename.EndsWith("_t") && e.Extension == "bnd")
+                .ToList();
+
+            secondaryDicts.Add(partDict);
+        }
+        else if (Project.ProjectType == ProjectType.ACV || Project.ProjectType == ProjectType.ACVD)
+        {
+            partDict.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Folder.StartsWith("/model/ac/") && e.Extension == "tpf")
+                .ToList();
+
+            secondaryDicts.Add(partDict);
+        }
+        else if (Project.ProjectType == ProjectType.DS2S || Project.ProjectType == ProjectType.DS2)
         {
             var commonPartDict = new FileDictionary();
             commonPartDict.Entries = Project.FileDictionary.Entries

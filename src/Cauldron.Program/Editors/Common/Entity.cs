@@ -1311,6 +1311,9 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Part ||
             WrappedObject is MSBE.Part ||
             WrappedObject is MSBS.Part ||
+            WrappedObject is MSBFA.Part ||
+            WrappedObject is MSBV.Part ||
+            WrappedObject is MSBVD.Part ||
             WrappedObject is MSB_AC6.Part ||
             WrappedObject is MSB_NR.Part ? true : false;
     }
@@ -1327,6 +1330,9 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Region ||
             WrappedObject is MSBE.Region ||
             WrappedObject is MSBS.Region ||
+            WrappedObject is MSBFA.Region ||
+            WrappedObject is MSBV.Region ||
+            WrappedObject is MSBVD.Region ||
             WrappedObject is MSB_AC6.Region ||
             WrappedObject is MSB_NR.Region ? true : false;
     }
@@ -1343,6 +1349,9 @@ public class Entity : ISelectable, IDisposable
             WrappedObject is MSBD.Event ||
             WrappedObject is MSBE.Event ||
             WrappedObject is MSBS.Event ||
+            WrappedObject is MSBFA.Event ||
+            WrappedObject is MSBV.Event ||
+            WrappedObject is MSBVD.Event ||
             WrappedObject is MSB_AC6.Event ||
             WrappedObject is MSB_NR.Event ? true : false;
     }
