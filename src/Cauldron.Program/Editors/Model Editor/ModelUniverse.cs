@@ -161,9 +161,10 @@ public class ModelUniverse
         // Character
         if (CFG.Current.ModelEditor_ModelLoad_Characters)
         {
-            if (modelName.StartsWith('c'))
+            if (modelName.StartsWith('c') || modelName.StartsWith('e'))
             {
-                var modelAsset = ModelLocator.GetChrModel(Editor.Project, modelName, modelName);
+                var name = ModelLocator.ChrModelNameToAssetName(Editor.Project, modelName);
+                var modelAsset = ModelLocator.GetChrModel(Editor.Project, name, modelName);
 
                 if (modelAsset.IsValid())
                     LoadList_Character_Model.Add(modelAsset);
@@ -175,7 +176,8 @@ public class ModelUniverse
         {
             if (modelName.StartsWith('o') || (modelName.StartsWith("AEG") || modelName.StartsWith("aeg")))
             {
-                var modelAsset = ModelLocator.GetObjModel(Editor.Project, modelName, modelName);
+                var name = ModelLocator.ObjModelNameToAssetName(Editor.Project, modelName);
+                var modelAsset = ModelLocator.GetObjModel(Editor.Project, name, modelName);
 
                 if (modelAsset.IsValid())
                     LoadList_Asset_Model.Add(modelAsset);
@@ -251,7 +253,8 @@ public class ModelUniverse
             if (modelName.StartsWith('c') || modelName.StartsWith('e'))
             {
                 // TPF
-                var textureAsset = ResourceLocator.GetCharacterTextureVP(Editor.Project, modelName, false);
+                var name = ModelLocator.ChrModelNameToAssetName(Editor.Project, modelName);
+                var textureAsset = ResourceLocator.GetCharacterTextureVP(Editor.Project, name, false);
 
                 if (textureAsset.IsValid())
                     LoadList_Character_Texture.Add(textureAsset);
@@ -269,7 +272,8 @@ public class ModelUniverse
         {
             if (modelName.StartsWith('o'))
             {
-                var textureAsset = ResourceLocator.GetObjectTextureVP(Editor.Project, modelName);
+                var name = ModelLocator.ChrModelNameToAssetName(Editor.Project, modelName);
+                var textureAsset = ResourceLocator.GetObjectTextureVP(Editor.Project, name);
 
                 if (textureAsset.IsValid())
                     LoadList_Asset_Texture.Add(textureAsset);

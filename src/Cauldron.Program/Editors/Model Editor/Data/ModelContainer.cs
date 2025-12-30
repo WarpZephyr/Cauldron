@@ -210,12 +210,14 @@ public class ModelContainer : ObjectContainer
         }
         else if (modelName.StartsWith("c", StringComparison.CurrentCultureIgnoreCase) || modelName.StartsWith("e", StringComparison.CurrentCultureIgnoreCase))
         {
-            resource = ModelLocator.GetChrModel(Project, modelName, modelName);
+            var name = ModelLocator.ChrModelNameToAssetName(Project, modelName);
+            resource = ModelLocator.GetChrModel(Project, name, modelName);
         }
         else if (modelName.StartsWith("o", StringComparison.CurrentCultureIgnoreCase) || 
             (modelName.StartsWith("AEG") || modelName.StartsWith("aeg")))
         {
-            resource = ModelLocator.GetObjModel(Project, modelName, modelName);
+            var name = ModelLocator.ObjModelNameToAssetName(Project, modelName);
+            resource = ModelLocator.GetObjModel(Project, name, modelName);
         }
         else if (modelName.StartsWith("am") || modelName.StartsWith("AM") || 
             modelName.StartsWith("lg") || modelName.StartsWith("LG") || 

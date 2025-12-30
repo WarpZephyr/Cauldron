@@ -789,13 +789,19 @@ public class ResourceLocator
         ad.AssetVirtualPath = null;
         ad.AssetArchiveVirtualPath = null;
 
-        if (project.ProjectType is ProjectType.DES or ProjectType.ACV or ProjectType.ACVD)
+        if (project.ProjectType is ProjectType.DES)
         {
             ad.AssetVirtualPath = $@"chr/{id}/tex";
         }
+        else if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
+        {
+            if (!binder)
+                ad.AssetVirtualPath = $@"chr/{id}/tex";
+        }
         else if (project.ProjectType is ProjectType.ACFA)
         {
-            ad.AssetArchiveVirtualPath = $@"chr/{id}/tex";
+            if (binder)
+                ad.AssetArchiveVirtualPath = $@"chr/{id}/tex";
         }
         else if (project.ProjectType is ProjectType.DS1 or ProjectType.DS1R or ProjectType.BB)
         {
@@ -844,7 +850,13 @@ public class ResourceLocator
 
         if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
         {
-            ad.AssetVirtualPath = $@"obj/{id}/tex";
+            if (!binder)
+                ad.AssetVirtualPath = $@"obj/{id}/tex";
+        }
+        else if (project.ProjectType is ProjectType.ACFA)
+        {
+            if (binder)
+                ad.AssetArchiveVirtualPath = $@"obj/{id}/tex";
         }
         else
         {

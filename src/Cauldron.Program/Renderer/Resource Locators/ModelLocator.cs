@@ -29,6 +29,32 @@ public static class ModelLocator
         return $@"{mapid}_{modelname.Substring(1)}";
     }
 
+    public static string ObjModelNameToAssetName(ProjectEntry project, string modelname)
+    {
+        if (project.ProjectType == ProjectType.ACFA
+            || project.ProjectType == ProjectType.ACV
+            || project.ProjectType == ProjectType.ACVD)
+        {
+            if (modelname.Length > 5)
+                return modelname[..5];
+        }
+
+        return modelname;
+    }
+
+    public static string ChrModelNameToAssetName(ProjectEntry project, string modelname)
+    {
+        if (project.ProjectType == ProjectType.ACFA
+            || project.ProjectType == ProjectType.ACV
+            || project.ProjectType == ProjectType.ACVD)
+        {
+            if (modelname.Length > 5)
+                return modelname[..5];
+        }
+
+        return modelname;
+    }
+
     // For Model Editor
     public static string GetMapModelName(ProjectEntry project, string mapid, string modelname)
     {
