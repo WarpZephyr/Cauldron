@@ -1447,12 +1447,22 @@ public class FlverResource : IResource, IDisposable
         // Move NormalW local indices to global bone indices for shader
         if (curProject.ProjectType is ProjectType.ACV or ProjectType.ACVD && mesh.Dynamic != 1)
         {
-            for (int i = 0; i < mesh.Vertices.Count; i++)
+            if (mesh.BoneIndices.Count < 1)
             {
-                var vert = mesh.Vertices[i];
-                if (vert.NormalW < mesh.BoneIndices.Count && vert.NormalW >= 0)
+                for (int i = 0; i < mesh.Vertices.Count; i++)
                 {
-                    mesh.Vertices[i].NormalW = mesh.BoneIndices[vert.NormalW];
+                    mesh.Vertices[i].NormalW = mesh.NodeIndex;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < mesh.Vertices.Count; i++)
+                {
+                    var vert = mesh.Vertices[i];
+                    if (vert.NormalW < mesh.BoneIndices.Count && vert.NormalW >= 0)
+                    {
+                        mesh.Vertices[i].NormalW = mesh.BoneIndices[vert.NormalW];
+                    }
                 }
             }
         }

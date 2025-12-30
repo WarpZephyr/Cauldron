@@ -161,7 +161,7 @@ public class ModelUniverse
         // Character
         if (CFG.Current.ModelEditor_ModelLoad_Characters)
         {
-            if (modelName.StartsWith('c') || modelName.StartsWith('e'))
+            if ((modelName.StartsWith('c') && !modelName.StartsWith("cr")) || modelName.StartsWith('e'))
             {
                 var name = ModelLocator.ChrModelNameToAssetName(Editor.Project, modelName);
                 var modelAsset = ModelLocator.GetChrModel(Editor.Project, name, modelName);
@@ -174,7 +174,7 @@ public class ModelUniverse
         // Object / Asset
         if (CFG.Current.ModelEditor_TextureLoad_Objects)
         {
-            if (modelName.StartsWith('o') || (modelName.StartsWith("AEG") || modelName.StartsWith("aeg")))
+            if ((modelName.StartsWith('o') && !modelName.StartsWith("ow")) || (modelName.StartsWith("AEG") || modelName.StartsWith("aeg")))
             {
                 var name = ModelLocator.ObjModelNameToAssetName(Editor.Project, modelName);
                 var modelAsset = ModelLocator.GetObjModel(Editor.Project, name, modelName);
@@ -187,11 +187,24 @@ public class ModelUniverse
         // Part
         if (CFG.Current.ModelEditor_ModelLoad_Parts)
         {
-            if (modelName.StartsWith("am") || modelName.StartsWith("AM") ||
-            modelName.StartsWith("lg") || modelName.StartsWith("LG") ||
-            modelName.StartsWith("bd") || modelName.StartsWith("BD") ||
-            modelName.StartsWith("hd") || modelName.StartsWith("HD") ||
-            modelName.StartsWith("wp") || modelName.StartsWith("WP"))
+            const StringComparison strComp = StringComparison.InvariantCultureIgnoreCase;
+            if (modelName.StartsWith("am", strComp) ||
+            modelName.StartsWith("lg", strComp) ||
+            modelName.StartsWith("cr", strComp) ||
+            modelName.StartsWith("bd", strComp) ||
+            modelName.StartsWith("hd", strComp) ||
+            modelName.StartsWith("fs", strComp) ||
+            modelName.StartsWith("gn", strComp) ||
+            modelName.StartsWith("rc", strComp) ||
+            modelName.StartsWith("sh", strComp) ||
+            modelName.StartsWith("ow", strComp) ||
+            modelName.StartsWith("hr", strComp) ||
+            modelName.StartsWith("hl", strComp) ||
+            modelName.StartsWith("bs", strComp) ||
+            modelName.StartsWith("gbs", strComp) ||
+            modelName.StartsWith("hgr", strComp) ||
+            modelName.StartsWith("hgl", strComp) ||
+            modelName.StartsWith("wp", strComp))
             {
                 var modelAsset = ModelLocator.GetPartsModel(Editor.Project, modelName, modelName);
 
@@ -250,7 +263,7 @@ public class ModelUniverse
         // Character
         if (CFG.Current.ModelEditor_TextureLoad_Characters)
         {
-            if (modelName.StartsWith('c') || modelName.StartsWith('e'))
+            if ((modelName.StartsWith('c') && !modelName.StartsWith("cr")) || modelName.StartsWith('e'))
             {
                 // TPF
                 var name = ModelLocator.ChrModelNameToAssetName(Editor.Project, modelName);
@@ -270,7 +283,7 @@ public class ModelUniverse
         // Object
         if (CFG.Current.ModelEditor_TextureLoad_Objects)
         {
-            if (modelName.StartsWith('o'))
+            if (modelName.StartsWith('o') && !modelName.StartsWith("ow"))
             {
                 var name = ModelLocator.ChrModelNameToAssetName(Editor.Project, modelName);
                 var textureAsset = ResourceLocator.GetObjectTextureVP(Editor.Project, name);
@@ -292,11 +305,24 @@ public class ModelUniverse
         // Part
         if (CFG.Current.ModelEditor_TextureLoad_Parts)
         {
-            if (modelName.StartsWith("am") || modelName.StartsWith("AM") ||
-            modelName.StartsWith("lg") || modelName.StartsWith("LG") ||
-            modelName.StartsWith("bd") || modelName.StartsWith("BD") ||
-            modelName.StartsWith("hd") || modelName.StartsWith("HD") ||
-            modelName.StartsWith("wp") || modelName.StartsWith("WP"))
+            const StringComparison strComp = StringComparison.InvariantCultureIgnoreCase;
+            if (modelName.StartsWith("am", strComp) ||
+            modelName.StartsWith("lg", strComp) ||
+            modelName.StartsWith("cr", strComp) ||
+            modelName.StartsWith("bd", strComp) ||
+            modelName.StartsWith("hd", strComp) ||
+            modelName.StartsWith("fs", strComp) ||
+            modelName.StartsWith("gn", strComp) ||
+            modelName.StartsWith("rc", strComp) ||
+            modelName.StartsWith("sh", strComp) ||
+            modelName.StartsWith("ow", strComp) ||
+            modelName.StartsWith("hr", strComp) ||
+            modelName.StartsWith("hl", strComp) ||
+            modelName.StartsWith("bs", strComp) ||
+            modelName.StartsWith("gbs", strComp) ||
+            modelName.StartsWith("hgr", strComp) ||
+            modelName.StartsWith("hgl", strComp) ||
+            modelName.StartsWith("wp", strComp))
             {
                 var textureAsset = ResourceLocator.GetPartTextureVP(Editor.Project, modelName);
 

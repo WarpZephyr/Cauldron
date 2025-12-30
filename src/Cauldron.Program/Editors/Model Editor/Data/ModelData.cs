@@ -172,6 +172,22 @@ public class ModelData
                 .Where(e => e.Extension == "bnd")
                 .ToList();
         }
+        else if (Project.ProjectType is ProjectType.ACFA)
+        {
+            PartFiles.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Folder.StartsWith($"/model/ac") || e.Folder.StartsWith($"/model/garage"))
+                .Where(e => e.Filename.EndsWith("_m"))
+                .Where(e => e.Extension == "bnd")
+                .ToList();
+        }
+        else if (Project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
+        {
+            PartFiles.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Folder.StartsWith($"/model/ac"))
+                .Where(e => e.Filename.EndsWith("_m"))
+                .Where(e => e.Extension == "bnd")
+                .ToList();
+        }
         else if (Project.ProjectType is ProjectType.DS3 or ProjectType.BB or ProjectType.SDT)
         {
             PartFiles.Entries = Project.FileDictionary.Entries
@@ -286,7 +302,7 @@ public class ModelData
             else if (Project.ProjectType is ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
             {
                 entries = Project.FileDictionary.Entries
-                    .Where(e => e.Folder.StartsWith($"/model/map/{mapid}/"))
+                    .Where(e => e.Folder.StartsWith($"/model/map/{mapid}"))
                     .Where(e => e.Filename.EndsWith($"_m"))
                     .Where(e => e.Extension == "bnd")
                     .ToList();

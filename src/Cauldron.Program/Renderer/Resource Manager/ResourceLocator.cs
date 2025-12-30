@@ -422,6 +422,63 @@ public class ResourceLocator
                 {
                     relPath = Path.Combine("parts", $"{partsId}.partsbnd");
                 }
+                if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
+                {
+                    var partType = "";
+                    switch (partsId[..^4])
+                    {
+                        case "am":
+                            partType = "arm";
+                            break;
+                        case "cr":
+                            partType = "core";
+                            break;
+                        case "fs":
+                            partType = "fcs";
+                            break;
+                        case "hd":
+                            partType = "head";
+                            break;
+                        case "lg":
+                            partType = "leg";
+                            break;
+                        case "sh":
+                            partType = "shoul";
+                            break;
+                        case "rc":
+                            partType = "recon";
+                            break;
+                        case "bs":
+                            partType = "boost";
+                            break;
+                        case "gn":
+                            partType = "gene";
+                            break;
+                        case "ow":
+                            partType = "ow";
+                            break;
+                        case "hr":
+                        case "hl":
+                            partType = "hand";
+                            break;
+                        case "hgr":
+                        case "hgl":
+                            partType = "hanger";
+                            break;
+                        case "gbs":
+                            partType = "g_boost";
+                            break;
+                    }
+
+                    if (p[i].Equals("model"))
+                    {
+                        relPath = Path.Combine("model", "ac", "parts", partType, partsId, $"{partsId}_m.bnd.dcx");
+                    }
+                    else
+                    {
+                        relPath = Path.Combine("model", "ac", "parts", partType, partsId, $"{partsId}_gt.tpf.dcx"); // Prefer garage textures for now
+                    }
+                }
                 else if (project.ProjectType is ProjectType.DS2S or ProjectType.DS2)
                 {
                     var partType = "";
@@ -874,7 +931,14 @@ public class ResourceLocator
         ad.AssetVirtualPath = null;
         ad.AssetArchiveVirtualPath = null;
 
-        ad.AssetArchiveVirtualPath = $@"parts/{id}/tex";
+        if (project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
+        {
+            ad.AssetVirtualPath = $@"parts/{id}/tex";
+        }
+        else
+        {
+            ad.AssetArchiveVirtualPath = $@"parts/{id}/tex";
+        }
 
         return ad;
     }

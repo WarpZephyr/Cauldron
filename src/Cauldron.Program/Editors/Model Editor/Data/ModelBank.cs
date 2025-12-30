@@ -136,10 +136,12 @@ public class ModelContainerWrapper
     {
         var parts = Path.Split("/");
 
-        if (Project.ProjectType is ProjectType.ER or ProjectType.AC6 or ProjectType.NR)
+        if (Project.ProjectType is ProjectType.ER or ProjectType.AC6 or ProjectType.NR or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
         {
             // '/map/m30/m30_00_00_00/...'
-            if(parts.Length >= 3)
+            // '/model/map/m3100/...'
+            // '/model/map/m010/...'
+            if (parts.Length >= 3)
             {
                 MapID = parts[3];
             }
@@ -168,7 +170,7 @@ public class ModelContainerWrapper
 
         if (binderType is ResourceContainerType.BND)
         {
-            if (Project.ProjectType is ProjectType.DS1 or ProjectType.DS1R or ProjectType.DES or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+            if (Project.ProjectType is ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
             {
                 try
                 {
@@ -250,9 +252,9 @@ public class ModelContainerWrapper
 
             if (bhd.Length != 0 && bdt.Length != 0)
             {
-                if (Project.ProjectType is ProjectType.DES
-                    or ProjectType.DS1
-                    or ProjectType.DS1R)
+                if (Project.ProjectType is ProjectType.ACFA
+                    or ProjectType.ACV
+                    or ProjectType.ACVD)
                 {
                     var binder = new BXF3Reader(bhd, bdt);
                     foreach (var file in binder.Files)

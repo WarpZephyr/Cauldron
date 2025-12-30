@@ -342,7 +342,11 @@ public static class ModelLocator
         ret.AssetName = partId;
         ret.AssetArchiveVirtualPath = $@"parts/{partContainerId}/model";
 
-        if (project.ProjectType == ProjectType.DS2S || project.ProjectType == ProjectType.DS2)
+        if (project.ProjectType == ProjectType.ACFA || project.ProjectType == ProjectType.ACV || project.ProjectType == ProjectType.ACVD)
+        {
+            ret.AssetVirtualPath = $@"parts/{partContainerId}/model/{partId}.flv";
+        }
+        else if (project.ProjectType == ProjectType.DS2S || project.ProjectType == ProjectType.DS2)
         {
             ret.AssetVirtualPath = $@"parts/{partContainerId}/model/{partId}.flv";
         }
@@ -359,6 +363,57 @@ public static class ModelLocator
         if (project.ProjectType == ProjectType.DS1)
         {
             ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("parts", $"{partId}.partsbnd"));
+        }
+        // TODO ACFA
+        else if (project.ProjectType == ProjectType.ACV || project.ProjectType == ProjectType.ACVD)
+        {
+            var partType = "";
+            switch (partId[..^4])
+            {
+                case "am":
+                    partType = "arm";
+                    break;
+                case "cr":
+                    partType = "core";
+                    break;
+                case "fs":
+                    partType = "fcs";
+                    break;
+                case "hd":
+                    partType = "head";
+                    break;
+                case "lg":
+                    partType = "leg";
+                    break;
+                case "sh":
+                    partType = "shoul";
+                    break;
+                case "rc":
+                    partType = "recon";
+                    break;
+                case "bs":
+                    partType = "boost";
+                    break;
+                case "gn":
+                    partType = "gene";
+                    break;
+                case "ow":
+                    partType = "ow";
+                    break;
+                case "hr":
+                case "hl":
+                    partType = "hand";
+                    break;
+                case "hgr":
+                case "hgl":
+                    partType = "hanger";
+                    break;
+                case "gbs":
+                    partType = "g_boost";
+                    break;
+            }
+
+            ret.AssetPath = LocatorUtils.GetOverridenFilePath(project, Path.Join("model", "ac", "parts", partType, partId, $"{partId}_m.bnd"));
         }
         else if (project.ProjectType == ProjectType.DS2S || project.ProjectType == ProjectType.DS2)
         {

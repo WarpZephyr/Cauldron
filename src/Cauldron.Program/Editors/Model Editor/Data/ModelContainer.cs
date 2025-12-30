@@ -202,32 +202,44 @@ public class ModelContainer : ObjectContainer
         }
 
         ResourceJobBuilder job = ResourceManager.CreateNewJob(@"Loading mesh");
-
-        if (modelName.StartsWith("m", StringComparison.CurrentCultureIgnoreCase))
+        const StringComparison strComp = StringComparison.InvariantCultureIgnoreCase;
+        if (modelName.StartsWith("m", strComp))
         {
             var name = ModelLocator.GetMapModelName(Project, mapID, modelName);
             resource = ModelLocator.GetMapModel(Project, mapID, name, name);
         }
-        else if (modelName.StartsWith("c", StringComparison.CurrentCultureIgnoreCase) || modelName.StartsWith("e", StringComparison.CurrentCultureIgnoreCase))
+        else if ((modelName.StartsWith("c", strComp) && !modelName.StartsWith("cr")) || modelName.StartsWith("e", strComp))
         {
             var name = ModelLocator.ChrModelNameToAssetName(Project, modelName);
             resource = ModelLocator.GetChrModel(Project, name, modelName);
         }
-        else if (modelName.StartsWith("o", StringComparison.CurrentCultureIgnoreCase) || 
+        else if ((modelName.StartsWith('o') && !modelName.StartsWith("ow")) || 
             (modelName.StartsWith("AEG") || modelName.StartsWith("aeg")))
         {
             var name = ModelLocator.ObjModelNameToAssetName(Project, modelName);
             resource = ModelLocator.GetObjModel(Project, name, modelName);
         }
-        else if (modelName.StartsWith("am") || modelName.StartsWith("AM") || 
-            modelName.StartsWith("lg") || modelName.StartsWith("LG") || 
-            modelName.StartsWith("bd") || modelName.StartsWith("BD") || 
-            modelName.StartsWith("hd") || modelName.StartsWith("HD") || 
-            modelName.StartsWith("wp") || modelName.StartsWith("WP"))
+        else if (modelName.StartsWith("am", strComp) ||
+            modelName.StartsWith("lg", strComp) ||
+            modelName.StartsWith("cr", strComp) ||
+            modelName.StartsWith("bd", strComp) ||
+            modelName.StartsWith("hd", strComp) ||
+            modelName.StartsWith("fs", strComp) ||
+            modelName.StartsWith("gn", strComp) ||
+            modelName.StartsWith("rc", strComp) ||
+            modelName.StartsWith("sh", strComp) ||
+            modelName.StartsWith("ow", strComp) ||
+            modelName.StartsWith("hr", strComp) ||
+            modelName.StartsWith("hl", strComp) ||
+            modelName.StartsWith("bs", strComp) ||
+            modelName.StartsWith("gbs", strComp) ||
+            modelName.StartsWith("hgr", strComp) ||
+            modelName.StartsWith("hgl", strComp) ||
+            modelName.StartsWith("wp", strComp))
         {
             resource = ModelLocator.GetPartsModel(Editor.Project, modelName, modelName);
         }
-        else if (modelName.StartsWith("h", StringComparison.CurrentCultureIgnoreCase))
+        else if (modelName.StartsWith("h", strComp))
         {
             loadCol = true;
 
