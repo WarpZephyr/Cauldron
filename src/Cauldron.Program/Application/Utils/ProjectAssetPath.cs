@@ -23,6 +23,9 @@ public static class ProjectAssetPath
     public static string GetArchiveKeysFolder()
         => Path.Join(AppContext.BaseDirectory, "Assets", "Archive Keys");
 
+    public static string GetParamFolder()
+        => Path.Join(AppContext.BaseDirectory, "Assets", "PARAM");
+
 
 
     public static string GetFileDictionariesFolder(ProjectEntry projectEntry)
@@ -40,7 +43,8 @@ public static class ProjectAssetPath
     public static string GetArchiveKeysFolder(ProjectEntry projectEntry)
         => Path.Join(AppContext.BaseDirectory, "Assets", "Archive Keys", ProjectUtils.GetGameDirectory(projectEntry), ProjectUtils.GetPlatformDirectory(projectEntry));
 
-
+    public static string GetParamFolder(ProjectEntry projectEntry)
+        => Path.Join(AppContext.BaseDirectory, "Assets", "PARAM", ProjectUtils.GetGameDirectory(projectEntry));
 
     public static string GetFileDictionaryPath(ProjectEntry projectEntry)
         => Path.Join(AppContext.BaseDirectory, "Assets", "File Dictionaries", ProjectUtils.GetGameDirectory(projectEntry), ProjectUtils.GetPlatformDirectory(projectEntry), "File-Dictionary.json");
@@ -62,4 +66,7 @@ public static class ProjectAssetPath
 
     public static string GetArchiveKeyPath(ProjectEntry projectEntry, string name)
         => Path.Join(AppContext.BaseDirectory, "Assets", "Archive Keys", ProjectUtils.GetGameDirectory(projectEntry), ProjectUtils.GetPlatformDirectory(projectEntry), $"{name}.pem");
+
+    public static string GetParamListPath(ProjectEntry projectEntry)
+        => Path.Join(AppContext.BaseDirectory, "Assets", "PARAM", ProjectUtils.GetGameDirectory(projectEntry), $"Param List.txt");
 }

@@ -1,3 +1,124 @@
 {
-  
+  "Categories": [
+    {
+      "DisplayName": "AC Control",
+      "Params": [
+        "acactrestrictionparam"
+      ]
+    },
+    {
+      "DisplayName": "AC Animation",
+      "Params": [
+        "acmotion",
+        "acanimhokan",
+        "armweaponaiminfo",
+        "armaimcollate",
+        "motioncollate"
+      ]
+    },
+    {
+      "DisplayName": "Sfx",
+      "Params": [
+        "groundsfxparam",
+        "groundsfxparam1",
+        "groundsfxparam2",
+        "groundsfxparam3",
+        "mapsfxparam",
+        "sfxlimitparam"
+      ]
+    },
+    {
+      "DisplayName": "Sound",
+      "Params": [
+        "acsoundparam",
+        "groundsoundparam"
+      ]
+    },
+    {
+      "DisplayName": "Battle Map Data",
+      "Params": [
+        "battlemapinfo"
+      ]
+    },
+    {
+      "DisplayName": "Arena Map Data",
+      "Params": [
+        "arenamapinfo"
+      ]
+    },
+    {
+      "DisplayName": "Assembly Screen Layout",
+      "Params": [
+        "acsisdisplay"
+      ]
+    },
+    {
+      "DisplayName": "Destruction",
+      "Params": [
+        "destroyap",
+        "destroyfall"
+      ]
+    },
+    {
+      "DisplayName": "AI Resource",
+      "Params": [
+        "acaiparam",
+        "aicommonparam"
+      ]
+    },
+    {
+      "DisplayName": "Bullet",
+      "Params": [
+        "bulletarise",
+        "bulletblade",
+        "bulletdecoy",
+        "bulletecm",
+        "bulletenergy",
+        "bulletexplosion",
+        "bulletglue",
+        "bulletkojimazone",
+        "bulletmissile",
+        "bulletrigid"
+      ]
+    },
+    {
+      "DisplayName": "Bullet Sfx",
+      "Params": [
+        "acweaponsfxparam",
+        "enemyweaponsfxparam",
+        "bullethitsfxparam"
+      ]
+    },
+    {
+      "DisplayName": "Bullet Sound",
+      "Params": [
+        "acweaponsoundparam",
+        "enemyweaponsoundparam",
+        "bullethitseparam"
+      ]
+    },
+    {
+      "DisplayName": "Enemy",
+      "Params": [
+        "enemybasicparam",
+        "enemycommon",
+        "enemygraphicsparam",
+        "enemyperformanceparam",
+        "enemyweapon"
+      ]
+    },
+    {
+      "DisplayName": "Enemy Bullet",
+      "Params": [
+        "bulletlaunchenemy",
+        "enemybulletblade",
+        "enemybulletecm",
+        "enemybulletenergy",
+        "enemybulletexplosion",
+        "enemybulletglue",
+        "enemybulletmissile",
+        "enemybulletrigid"
+      ]
+    }
+  ]
 }

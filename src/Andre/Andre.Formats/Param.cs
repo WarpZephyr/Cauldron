@@ -486,7 +486,7 @@ public class Param : SoulsFile<Param>
             _paramData = new StridedByteArray(32, (uint)RowSize, BigEndian);
         }
         // If a row size is already read it must match our computed row size
-        else if (byteOffset != RowSize)
+        else if (byteOffset > RowSize)
         {
             //GenerateFilledParamDefFile(def, RowSize, fileName);
 
@@ -657,10 +657,17 @@ public class Param : SoulsFile<Param>
                 if (actualStringsOffset == 0 || nameOffset < actualStringsOffset)
                     actualStringsOffset = nameOffset;
 
-                if (Format2E.HasFlag(FormatFlags2.UnicodeRowNames))
-                    name = br.GetUTF16(nameOffset);
+                if (nameOffset >= br.Length)
+                {
+                    name = string.Empty;
+                }
                 else
-                    name = br.GetShiftJIS(nameOffset);
+                {
+                    if (Format2E.HasFlag(FormatFlags2.UnicodeRowNames))
+                        name = br.GetUTF16(nameOffset);
+                    else
+                        name = br.GetShiftJIS(nameOffset);
+                }
             }
 
             _rows.Add(new Row(id, name, this, dataIndex));

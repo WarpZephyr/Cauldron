@@ -163,7 +163,7 @@ public class TextBank
             // Populate the Text Fmg wrappers with their contents
             List<TextFmgWrapper> fmgWrappers = new List<TextFmgWrapper>();
 
-            if (Project.ProjectType is ProjectType.DS1 or ProjectType.DS1R or ProjectType.DES)
+            if (Project.ProjectType is ProjectType.DS1 or ProjectType.DS1R or ProjectType.DES or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
             {
                 using (IBinder binder = BND3.Read(containerBytes))
                 {

@@ -105,6 +105,8 @@ public class ParamBank
             case ProjectType.BB: successfulLoad = LoadParameters_BB(); break;
             case ProjectType.SDT: successfulLoad = LoadParameters_SDT(); break;
             case ProjectType.ER: successfulLoad = LoadParameters_ER(); break;
+            case ProjectType.ACFA: successfulLoad = LoadParameters_ACFA(); break;
+            case ProjectType.ACV: successfulLoad = LoadParameters_ACV(); break;
             case ProjectType.ACVD: successfulLoad = LoadParameters_ACVD(); break;
             case ProjectType.AC6: successfulLoad = LoadParameters_AC6(); break;
             case ProjectType.NR: successfulLoad = LoadParameters_NR(); break;
@@ -149,6 +151,10 @@ public class ParamBank
                 successfulSave = SaveParameters_SDT(); break;
             case ProjectType.ER:
                 successfulSave = SaveParameters_ER(); break;
+            case ProjectType.ACFA:
+                successfulSave = SaveParameters_ACFA(); break;
+            case ProjectType.ACV:
+                successfulSave = SaveParameters_ACV(); break;
             case ProjectType.ACVD:
                 successfulSave = SaveParameters_ACVD(); break;
             case ProjectType.AC6:
@@ -177,7 +183,15 @@ public class ParamBank
             }
         }
 
-        var paramData = TargetFS.GetFile(path).GetData();
+        var paramFile = TargetFS.GetFile(path);
+        if (paramFile == null)
+        {
+            TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not find loose param: \"{path}\"",
+                    LogLevel.Error, LogPriority.High);
+            return false;
+        }
+
+        var paramData = paramFile.GetData();
         if (paramData.Length < 1)
         {
             return true;
@@ -1599,164 +1613,247 @@ public class ParamBank
     }
     #endregion
 
+    #region Armored Core: For Answer
+    private void FindParameters_ACFA(List<string> generalParamList, List<string> langParamList)
+    {
+        // Find General Params
+        var paramListPath = ProjectAssetPath.GetParamListPath(Project);
+        if (File.Exists(paramListPath))
+        {
+            try
+            {
+                generalParamList.AddRange(File.ReadAllLines(paramListPath));
+            }
+            catch (Exception e)
+            {
+                TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not load param list: \"{paramListPath}\"",
+                    LogLevel.Error, LogPriority.High, e);
+            }
+        }
+        else
+        {
+            TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not find param list: \"{paramListPath}\"",
+                    LogLevel.Warning, LogPriority.High);
+        }
+
+        // Find Lang Params
+        // TODO Localized Params
+    }
+
+    private bool LoadParameters_ACFA()
+    {
+        var successfulLoad = true;
+        var generalParamList = new List<string>();
+        var langParamList = new List<string>();
+        FindParameters_ACFA(generalParamList, langParamList);
+
+        // Load general params
+        foreach (string paramPath in generalParamList)
+        {
+            var paramName = Path.GetFileNameWithoutExtension(paramPath);
+            if (!LoadLooseParam(paramPath, paramName, true, ref _params))
+                successfulLoad = false;
+        }
+
+        // Load lang params
+        // TODO Localized Params
+
+        return successfulLoad;
+    }
+
+    private bool SaveParameters_ACFA()
+    {
+        var successfulSave = true;
+        var fs = Project.FS;
+        var toFs = ProjectUtils.GetFilesystemForWrite(Project);
+
+        var generalParamList = new List<string>();
+        var langParamList = new List<string>();
+        FindParameters_ACFA(generalParamList, langParamList);
+
+        if (CFG.Current.Param_StripRowNamesOnSave_ACV)
+        {
+            RowNameStrip();
+        }
+
+        // Save general params
+        foreach (string paramPath in generalParamList)
+        {
+            string paramName = Path.GetFileNameWithoutExtension(paramPath);
+            if (!SaveLooseParam(fs, toFs, true, paramName, paramPath))
+                successfulSave = false;
+        }
+
+        // Save lang params
+        // TODO Localized Params
+        /*
+        foreach (string paramPath in langParamList)
+        {
+            var paramName = paramPath;
+            if (paramName.EndsWith(".bin", StringComparison.InvariantCultureIgnoreCase))
+                paramName = paramName[..^4];
+
+            if (!SaveLooseParam(fs, toFs, false, paramName, paramPath))
+                successfulSave = false;
+        }
+        */
+
+        if (CFG.Current.Param_StripRowNamesOnSave_ACV)
+        {
+            RowNameRestore();
+        }
+
+        return successfulSave;
+    }
+    #endregion
+
+    #region Armored Core V
+    private void FindParameters_ACV(List<string> generalParamList, List<string> langParamList)
+    {
+        // Find General Params
+        var paramListPath = ProjectAssetPath.GetParamListPath(Project);
+        if (File.Exists(paramListPath))
+        {
+            try
+            {
+                generalParamList.AddRange(File.ReadAllLines(paramListPath));
+            }
+            catch (Exception e)
+            {
+                TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not load param list: \"{paramListPath}\"",
+                    LogLevel.Error, LogPriority.High, e);
+            }
+        }
+        else
+        {
+            TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not find param list: \"{paramListPath}\"",
+                    LogLevel.Warning, LogPriority.High);
+        }
+
+        // Find Lang Params
+        // TODO Localized Params
+        /*
+        foreach (string lang in LanguageCodes.ACV_Languages)
+        {
+            string langFolder = $"/lang/{lang}";
+            langParamList.Add($"{langFolder}/text/ai/aisys.bin");
+            langParamList.Add($"{langFolder}/text/ai/aisys.emtm");
+            langParamList.Add($"{langFolder}/text/ai/aisys.tsmap");
+            langParamList.Add($"{langFolder}/param/hometowninfo.bin");
+            foreach (string region in RegionCodes.ACV_Regions)
+            {
+                langParamList.Add($"{langFolder}/param/hometowninfo_{region}.bin");
+            }
+
+            string langMissionFolder = $"{langFolder}/text/mission";
+            foreach (string fileName in TargetFS.GetFileNamesMatching(langMissionFolder, ".*?\\.(bin|emtm)"))
+            {
+                langParamList.Add(fileName.Replace('\\', '/'));
+            }
+        }
+        */
+    }
+
+    private bool LoadParameters_ACV()
+    {
+        var successfulLoad = true;
+        var generalParamList = new List<string>();
+        var langParamList = new List<string>();
+        FindParameters_ACV(generalParamList, langParamList);
+
+        // Load general params
+        foreach (string paramPath in generalParamList)
+        {
+            var paramName = Path.GetFileNameWithoutExtension(paramPath);
+            if (!LoadLooseParam(paramPath, paramName, true, ref _params))
+                successfulLoad = false;
+        }
+
+        // Load lang params
+        // TODO Localized Params
+        /*
+        foreach (string paramPath in langParamList)
+        {
+            var paramName = paramPath;
+            if (paramName.EndsWith(".bin", StringComparison.InvariantCultureIgnoreCase))
+                paramName = paramName[..^4];
+
+            if (!LoadLooseParam(paramPath, paramName, false, ref _params))
+                successfulLoad = false;
+        }
+        */
+
+        return successfulLoad;
+    }
+
+    private bool SaveParameters_ACV()
+    {
+        var successfulSave = true;
+        var fs = Project.FS;
+        var toFs = ProjectUtils.GetFilesystemForWrite(Project);
+
+        var generalParamList = new List<string>();
+        var langParamList = new List<string>();
+        FindParameters_ACV(generalParamList, langParamList);
+
+        if (CFG.Current.Param_StripRowNamesOnSave_ACV)
+        {
+            RowNameStrip();
+        }
+
+        // Save general params
+        foreach (string paramPath in generalParamList)
+        {
+            string paramName = Path.GetFileNameWithoutExtension(paramPath);
+            if (!SaveLooseParam(fs, toFs, true, paramName, paramPath))
+                successfulSave = false;
+        }
+
+        // Save lang params
+        // TODO Localized Params
+        /*
+        foreach (string paramPath in langParamList)
+        {
+            var paramName = paramPath;
+            if (paramName.EndsWith(".bin", StringComparison.InvariantCultureIgnoreCase))
+                paramName = paramName[..^4];
+
+            if (!SaveLooseParam(fs, toFs, false, paramName, paramPath))
+                successfulSave = false;
+        }
+        */
+
+        if (CFG.Current.Param_StripRowNamesOnSave_ACV)
+        {
+            RowNameRestore();
+        }
+
+        return successfulSave;
+    }
+    #endregion
+
     #region Armored Core: Verdict Day
     private void FindParameters_ACVD(List<string> generalParamList, List<string> langParamList)
     {
         // Find General Params
-        generalParamList.AddRange(new List<string>()
+        var paramListPath = ProjectAssetPath.GetParamListPath(Project);
+        if (File.Exists(paramListPath))
         {
-            "/param/acactrestrictionparam.bin",
-            "/param/acanimhokan.bin",
-            "/param/acassemblydrawing.bin",
-            "/param/acbattlestyle.bin",
-            "/param/accambehaviorparam.bin",
-            "/param/accameraaction.bin",
-            "/param/accameraoffsetparam.bin",
-            "/param/accamerarambleparam.bin",
-            "/param/acmotion.bin",
-            "/param/acobjectparam.bin",
-            "/param/acsisdisplay.bin",
-            "/param/acsoundparam.bin",
-            "/param/acvmissioninfo.bin",
-            "/param/acweaponsfxparam.bin",
-            "/param/acweaponsoundparam.bin",
-            "/param/aiextendexptable.bin",
-            "/param/aigrowparam.bin",
-            "/param/aigrowweapon.bin",
-            "/param/aithinkcapacitycalcparam.bin",
-            "/param/aithinkcost.bin",
-            "/param/arenamapinfo.bin",
-            "/param/arenasetinginfo.bin",
-            "/param/armaimcollate.bin",
-            "/param/armweaponaiminfo.bin",
-            "/param/battlemapinfo.bin",
-            "/param/briefingtextparam.bin",
-            "/param/bullethitdecalparam.bin",
-            "/param/bullethitseparam.bin",
-            "/param/bullethitsfxparam.bin",
-            "/param/charaeventdata.bin",
-            "/param/coloringset.bin",
-            "/param/colorpalette.bin",
-            "/param/customaichipparam.bin",
-            "/param/customgarage.bin",
-            "/param/customgarageparts.bin",
-            "/param/customlayoutareadata.bin",
-            "/param/customlayoutenemyparam.bin",
-            "/param/custommapclearpointparam.bin",
-            "/param/destroyap.param",
-            "/param/destroyparam.bin",
-            "/param/dlcaiparamset.bin",
-            "/param/emblemcategory.bin",
-            "/param/emblempieceparam.bin",
-            "/param/enemyacparam.bin",
-            "/param/enemyanimeinterpolationdata.bin",
-            "/param/enemybreakjunkdata.bin",
-            "/param/enemybreakrewarddata.bin",
-            "/param/enemygenerateparam.bin",
-            "/param/enemyweaponsfxparam.bin",
-            "/param/enemyweaponsoundparam.bin",
-            "/param/envsfxparam.bin",
-            "/param/factionordernumbergen.bin",
-            "/param/flocking.param",
-            "/param/garagelighting.bin",
-            "/param/groundsfxparam.bin",
-            "/param/groundsfxparam1.bin",
-            "/param/groundsfxparam2.bin",
-            "/param/groundsfxparam3.bin",
-            "/param/groundsoundparam.bin",
-            "/param/growpartsarmunitparam.bin",
-            "/param/growpartsbladeparam.bin",
-            "/param/growpartsbulletparam.bin",
-            "/param/growpartspatternparam.bin",
-            "/param/hardcoremodeparam.bin",
-            "/param/manualgroupparam.bin",
-            "/param/manualparam.bin",
-            "/param/mapobjbehaviorparam.bin",
-            "/param/mapobjparam.bin",
-            "/param/mapsfxparam.bin",
-            "/param/medalparam.bin",
-            "/param/menumodelparam.bin",
-            "/param/missioncreateparam.bin",
-            "/param/missionestimate2hard.bin",
-            "/param/missionestimate2normal.bin",
-            "/param/missionestimatehard.bin",
-            "/param/missionestimatenormal.bin",
-            "/param/missionmenudataparam.bin",
-            "/param/missionstoryparam.bin",
-            "/param/motioncollate.bin",
-            "/param/npcacparam.bin",
-            "/param/npccorpsparam.bin",
-            "/param/offlineexp2teamlv.bin",
-            "/param/offlineshoplineup.bin",
-            "/param/opescancamera.bin",
-            "/param/partsshoplineup.bin",
-            "/param/partsshoplineup_trial.bin",
-            "/param/pasfxparam.bin",
-            "/param/performancethreshold.bin",
-            "/param/playerexp2ratevaluelv.bin",
-            "/param/reverbparam.bin",
-            "/param/screenshotscoretable.bin",
-            "/param/serverrequesterrormessageinfo.bin",
-            "/param/sfxlimitparam.bin",
-            "/param/sfxsesetparam.bin",
-            "/param/systemcolor.bin",
-            "/param/teammedalparam.bin",
-            "/param/thumbnailtexture.bin",
-            "/param/tutorialfedata.bin",
-            "/param/welcometips.bin",
-            "/param/worldareabattlemapparam.bin",
-            "/param/worldnewsparam.bin",
-            "/param/selfillumeparam.bin",
-            "/param/movieplayinfo.bin",
-            "/param/autoblinkparam.bin",
-            "/param/zoomblurparam.bin",
-            "/param/postarization.bin",
-            "/param/camerablurparam.bin",
-            "/param/contrastparam.bin",
-            "/param/oldfilmparam.bin",
-            "/param/shakednoizefilterparam.bin",
-            "/param/raindropwaterparam.bin",
-            "/param/dofparam.bin",
-            "/param/tvfilterparam.bin",
-            "/param/highdofparam.bin",
-            "/param/linenoiseparam.bin",
-            "/airesource/acaiparam.bin",
-            "/airesource/acpathcostcalcparam.bin",
-            "/airesource/aiacweaponchipparameter.bin",
-            "/airesource/aicommonparam.bin",
-            "/airesource/atkpathcostcalcparam.bin",
-            "/airesource/escapepathcostcalcparam.bin",
-            "/bullet/bulletarise.bin",
-            "/bullet/bulletblade.bin",
-            "/bullet/bulletdecoy.bin",
-            "/bullet/bulletecm.bin",
-            "/bullet/bulletenergy.bin",
-            "/bullet/bulletexplosion.bin",
-            "/bullet/bulletglue.bin",
-            "/bullet/bulletkojimazone.bin",
-            "/bullet/bulletmissile.bin",
-            "/bullet/bulletrecon.bin",
-            "/bullet/bulletrigid.bin",
-            "/bullet/bulletstatuserror.bin",
-            "/param/enemy/bullet/bulletlaunchenemy.bin",
-            "/param/enemy/bullet/enemybulletblade.bin",
-            "/param/enemy/bullet/enemybulletecm.bin",
-            "/param/enemy/bullet/enemybulletenergy.bin",
-            "/param/enemy/bullet/enemybulletexplosion.bin",
-            "/param/enemy/bullet/enemybulletglue.bin",
-            "/param/enemy/bullet/enemybulletmissile.bin",
-            "/param/enemy/bullet/enemybulletrigid.bin",
-            "/param/enemy/bullet/enemybulletstatuserror.bin",
-            "/enemy/enemybasicparam.bin",
-            "/enemy/enemycommon.bin",
-            "/enemy/enemygraphicsparam.bin",
-            "/enemy/enemyheribehaviorparam.bin",
-            "/enemy/enemymechbehaviorparam.bin",
-            "/enemy/enemyperformanceparam.bin",
-            "/enemy/enemyweapon.bin",
-            "/enemy/noaibatterybehaviorparam.bin",
-            "/enemy/noaisquidbehaviorparam.bin"
-        });
+            try
+            {
+                generalParamList.AddRange(File.ReadAllLines(paramListPath));
+            }
+            catch (Exception e)
+            {
+                TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not load param list: \"{paramListPath}\"",
+                    LogLevel.Error, LogPriority.High, e);
+            }
+        }
+        else
+        {
+            TaskLogs.AddLog($"[{Project.ProjectName}:Param Editor:{Name}] Could not find param list: \"{paramListPath}\"",
+                    LogLevel.Warning, LogPriority.High);
+        }
 
         // Find Lang Params
         // TODO Localized Params

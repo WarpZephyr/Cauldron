@@ -132,6 +132,13 @@ public class TextData
                 .Where(e => e.Extension == "fmg").ToList();
         }
 
+        if (Project.ProjectType is ProjectType.ACFA)
+        {
+            fmgDictionary.Entries = Project.FileDictionary.Entries
+                .Where(e => e.Folder.StartsWith("/lang"))
+                .Where(e => e.Extension == "fmg").ToList();
+        }
+
         if (Project.ProjectType is ProjectType.ACV or ProjectType.ACVD)
         {
             fmgDictionary.Entries = Project.FileDictionary.Entries

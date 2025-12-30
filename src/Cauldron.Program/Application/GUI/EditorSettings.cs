@@ -845,6 +845,14 @@ public class ParamEditorTab
                         ImGui.Checkbox("Strip row names on save", ref CFG.Current.Param_StripRowNamesOnSave_ER);
                         break;
 
+                    case ProjectType.ACFA:
+                        ImGui.Checkbox("Strip row names on save", ref CFG.Current.Param_StripRowNamesOnSave_ACFA);
+                        break;
+
+                    case ProjectType.ACV:
+                        ImGui.Checkbox("Strip row names on save", ref CFG.Current.Param_StripRowNamesOnSave_ACV);
+                        break;
+
                     case ProjectType.ACVD:
                         ImGui.Checkbox("Strip row names on save", ref CFG.Current.Param_StripRowNamesOnSave_ACVD);
                         break;
@@ -890,6 +898,14 @@ public class ParamEditorTab
 
                     case ProjectType.ER:
                         ImGui.Checkbox("Restore stripped row names on load", ref CFG.Current.Param_RestoreStrippedRowNamesOnLoad_ER);
+                        break;
+
+                    case ProjectType.ACFA:
+                        ImGui.Checkbox("Restore stripped row names on load", ref CFG.Current.Param_RestoreStrippedRowNamesOnLoad_ACFA);
+                        break;
+
+                    case ProjectType.ACV:
+                        ImGui.Checkbox("Restore stripped row names on load", ref CFG.Current.Param_RestoreStrippedRowNamesOnLoad_ACV);
                         break;
 
                     case ProjectType.ACVD:

@@ -4,6 +4,14 @@ namespace StudioCore.Editors.TextEditor;
 
 public static class LanguageCodes
 {
+    public static List<string> ACFA_Languages = new()
+    {
+        "us",
+        "fr",
+        "jp",
+        "es",
+    };
+
     public static List<string> ACV_Languages = new()
     {
         "en",

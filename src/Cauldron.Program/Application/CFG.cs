@@ -1108,6 +1108,8 @@ public class CFG
     public bool Param_StripRowNamesOnSave_DS3 = false;
     public bool Param_StripRowNamesOnSave_SDT = false;
     public bool Param_StripRowNamesOnSave_ER = true;
+    public bool Param_StripRowNamesOnSave_ACFA = false;
+    public bool Param_StripRowNamesOnSave_ACV = false;
     public bool Param_StripRowNamesOnSave_ACVD = false;
     public bool Param_StripRowNamesOnSave_AC6 = false;
     public bool Param_StripRowNamesOnSave_NR = false;
@@ -1119,6 +1121,8 @@ public class CFG
     public bool Param_RestoreStrippedRowNamesOnLoad_DS3 = false;
     public bool Param_RestoreStrippedRowNamesOnLoad_SDT = false;
     public bool Param_RestoreStrippedRowNamesOnLoad_ER = true;
+    public bool Param_RestoreStrippedRowNamesOnLoad_ACFA = false;
+    public bool Param_RestoreStrippedRowNamesOnLoad_ACV = false;
     public bool Param_RestoreStrippedRowNamesOnLoad_ACVD = false;
     public bool Param_RestoreStrippedRowNamesOnLoad_AC6 = false;
     public bool Param_RestoreStrippedRowNamesOnLoad_NR = false;
