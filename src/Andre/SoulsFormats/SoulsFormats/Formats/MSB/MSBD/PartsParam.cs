@@ -26,8 +26,6 @@ namespace SoulsFormats
         /// </summary>
         public class PartsParam : Param<Part>, IMsbParam<IMsbPart>
         {
-            internal override string Name => "PARTS_PARAM_ST";
-
             /// <summary>
             /// All of the fixed visual geometry of the map.
             /// </summary>
@@ -81,7 +79,7 @@ namespace SoulsFormats
             /// <summary>
             /// Creates an empty PartsParam.
             /// </summary>
-            public PartsParam() : base()
+            public PartsParam() : base(0, "PARTS_PARAM_ST")
             {
                 MapPieces = new List<Part.MapPiece>();
                 Objects = new List<Part.Object>();
@@ -175,14 +173,9 @@ namespace SoulsFormats
         /// <summary>
         /// Common information for all concrete entities.
         /// </summary>
-        public abstract class Part : Entry, IMsbPart
+        public abstract class Part : ParamEntry, IMsbPart
         {
             private protected abstract PartType Type { get; }
-
-            /// <summary>
-            /// The name of the part.
-            /// </summary>
-            public string Name { get; set; }
 
             /// <summary>
             /// The model of the Part, corresponding to an entry in the ModelParam.

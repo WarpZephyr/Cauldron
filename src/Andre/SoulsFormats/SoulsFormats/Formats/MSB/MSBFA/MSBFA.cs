@@ -8,7 +8,7 @@ namespace SoulsFormats
     /// A map layout file used in Armored Core V.<br/>
     /// Extension: .msb
     /// </summary>
-    public partial class MSBFA : SoulsFile<MSBFA>, IMsbRouted, IMsbLayered, IMsbBound<MSBFA.MapStudioTree>
+    public partial class MSBFA : SoulsFile<MSBFA>, IMsbRouted, IMsbLayered, IMsbTreed
     {
         /// <summary>
         /// Model files that are available for parts to use.
@@ -47,12 +47,12 @@ namespace SoulsFormats
         IMsbParam<IMsbPart> IMsb.Parts => Parts;
 
         /// <summary>
-        /// A bounding volume hierarchy using Axis-Aligned Bounding Boxes for drawing.
+        /// A bounding volume hierarchy using Axis-Aligned Bounding Boxes for render culling.
         /// </summary>
         public MapStudioTreeParam DrawingTree { get; set; }
 
         /// <summary>
-        /// A bounding volume hierarchy using Axis-Aligned Bounding Boxes for collision detection.
+        /// A bounding volume hierarchy using Axis-Aligned Bounding Boxes for collision culling.
         /// </summary>
         public MapStudioTreeParam CollisionTree { get; set; }
 
@@ -67,7 +67,7 @@ namespace SoulsFormats
         /// Set to null when not in use.
         /// </summary>
         public MapStudioTreeParam Tree4 { get; set; }
-        public IReadOnlyList<IMsbTreeParam<MapStudioTree>> Trees => [DrawingTree, CollisionTree, Tree3, Tree4];
+        IReadOnlyList<IMsbTreeParam> IMsbTreed.Trees => [DrawingTree, CollisionTree, Tree3, Tree4];
 
         /// <summary>
         /// Create a new <see cref="MSBFA"/>.
@@ -268,8 +268,10 @@ namespace SoulsFormats
             /// </summary>
             /// <param name="bw"></param>
             /// <param name="entries"></param>
-            internal virtual void Write(BinaryWriterEx bw, List<T> entries)
+            internal virtual int[] Write(BinaryWriterEx bw, List<T> entries)
             {
+                int[] entryOffsets = new int[entries.Count];
+
                 bw.WriteInt32(Version);
                 bw.ReserveInt32("ParamNameOffset");
                 bw.WriteInt32(entries.Count + 1);
@@ -291,10 +293,13 @@ namespace SoulsFormats
                         id = 0;
                     }
 
-                    bw.FillInt32($"EntryOffset{i}", (int)bw.Position);
+                    entryOffsets[i] = (int)bw.Position;
+                    bw.FillInt32($"EntryOffset{i}", entryOffsets[i]);
                     entries[i].Write(bw, id);
                     id++;
                 }
+
+                return entryOffsets;
             }
 
             /// <summary>

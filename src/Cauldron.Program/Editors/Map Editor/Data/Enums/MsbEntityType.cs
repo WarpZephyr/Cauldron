@@ -10,6 +10,7 @@ public enum MsbEntityType
     Model,
     Route,
     Layer,
+    MapStudioTree,
     Light,
     DS2Generator,
     DS2GeneratorRegist,

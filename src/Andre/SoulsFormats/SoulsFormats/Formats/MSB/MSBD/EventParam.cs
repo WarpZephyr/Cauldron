@@ -23,8 +23,6 @@ namespace SoulsFormats
         /// </summary>
         public class EventParam : Param<Event>, IMsbParam<IMsbEvent>
         {
-            internal override string Name => "EVENT_PARAM_ST";
-
             /// <summary>
             /// Fixed point light sources.
             /// </summary>
@@ -63,7 +61,7 @@ namespace SoulsFormats
             /// <summary>
             /// Creates an empty EventParam.
             /// </summary>
-            public EventParam() : base()
+            public EventParam() : base(0, "EVENT_PARAM_ST")
             {
                 Lights = new List<Event.Light>();
                 Sounds = new List<Event.Sound>();
@@ -142,14 +140,9 @@ namespace SoulsFormats
         /// <summary>
         /// Common data for all dynamic events.
         /// </summary>
-        public abstract class Event : Entry, IMsbEvent
+        public abstract class Event : ParamEntry, IMsbEvent
         {
             private protected abstract EventType Type { get; }
-
-            /// <summary>
-            /// The name of the event.
-            /// </summary>
-            public string Name { get; set; }
 
             /// <summary>
             /// Unknown, should be unique.

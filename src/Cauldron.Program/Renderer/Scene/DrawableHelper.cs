@@ -304,6 +304,36 @@ public static class DrawableHelper
     }
 
     /// <summary>
+    /// The drawable proxies for a MapStudioTree map object
+    /// </summary>
+    public static RenderableProxy GetMapStudioTreeNodeDrawable(RenderScene scene, MapContainer map, Entity obj, RenderModelType renderType)
+    {
+        DebugPrimitiveRenderableProxy mesh = null;
+        if (obj.WrappedObject is IMsbTreeNode node)
+        {
+            // SOLID
+            if (renderType is RenderModelType.Solid)
+            {
+                mesh = RenderableHelper.GetSolidBoxRegionProxy(scene, node.Bounds.Min, node.Bounds.Max);
+            }
+            // WIREFRAME
+            else if (renderType is RenderModelType.Wireframe)
+            {
+                mesh = RenderableHelper.GetBoxRegionProxy(scene, node.Bounds.Min, node.Bounds.Max);
+            }
+        }
+
+        mesh.World = obj.GetWorldMatrix();
+        mesh.SetSelectable(obj);
+        mesh.DrawFilter = RenderFilter.MapStudioTree;
+
+        if (mesh == null)
+            throw new NotSupportedException($"No MapStudioTree model proxy was specified for {obj.WrappedObject.GetType()}");
+
+        return mesh;
+    }
+
+    /// <summary>
     /// The drawable proxies for a Light map object
     /// </summary>
     public static RenderableProxy GetLightDrawable(RenderScene scene, MapContainer map, Entity obj, RenderModelType renderType)

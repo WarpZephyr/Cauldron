@@ -152,6 +152,11 @@ namespace Veldrid.Utilities
                 Vector3.Max(box1.Max, box2.Max));
         }
 
+        public static float GetDistanceByCenter(BoundingBox box1, BoundingBox box2)
+        {
+            return Vector3.Distance(box1.GetCenter(), box2.GetCenter());
+        }
+
         public static bool operator ==(BoundingBox first, BoundingBox second)
         {
             return first.Equals(second);

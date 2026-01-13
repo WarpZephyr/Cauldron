@@ -8,9 +8,9 @@ namespace SoulsFormats
     public partial class MSBVD
     {
         /// <summary>
-        /// A hierarchy used in calculations such as drawing and collision.
+        /// A bounding-volume hierarchy used in calculations such as drawing and collision.
         /// </summary>
-        public class MapStudioTreeParam : IMsbTreeParam<MapStudioTree>
+        public class MapStudioTreeParam : IMsbTreeParam
         {
             /// <summary>
             /// Unknown; probably some kind of version number.
@@ -20,25 +20,30 @@ namespace SoulsFormats
             /// <summary>
             /// The Name or Type of the Param.
             /// </summary>
-            private protected string Name = "MAPSTUDIO_TREE_ST";
+            private protected string Name { get; }
 
             /// <summary>
-            /// The axis-aligned tree bounding volume hierarchy.<br/>
-            /// Set to null when not calculated yet.
+            /// Whether or not this is the last param.
             /// </summary>
-            public MapStudioTree Tree { get; set; }
+            internal protected bool IsLastParam;
+
+            /// <summary>
+            /// The axis-aligned tree bounding volume hierarchy root node.<br/>
+            /// Set to null when not present.
+            /// </summary>
+            public MapStudioTreeNode Root { get; set; }
+            IMsbTreeNode IMsbTreeParam.Root { get => Root; set => Root = (MapStudioTreeNode)value; }
 
             /// <summary>
             /// Create a new <see cref="MapStudioTreeParam"/>.
             /// </summary>
             public MapStudioTreeParam()
             {
-                // Set node null as we need to calculate that later
-                Tree = null;
                 Version = 10001002;
+                Name = "MAPSTUDIO_TREE_ST";
             }
 
-            internal MapStudioTree Read(BinaryReaderEx br)
+            internal MapStudioTreeNode Read(BinaryReaderEx br)
             {
                 Version = br.ReadInt32();
                 int nameOffset = br.ReadInt32();
@@ -62,25 +67,24 @@ namespace SoulsFormats
                 if (offsetCount - 1 != 0)
                 {
                     br.Position = rootNodeOffset;
-                    Tree = new MapStudioTree(br);
-                }
-                else
-                {
-                    Tree = null;
+                    Root = new MapStudioTreeNode(br);
                 }
 
+                IsLastParam = true;
                 if (nextParamOffset > 0)
                 {
+                    IsLastParam = false;
                     br.Position = nextParamOffset;
                 }
-                return Tree;
+
+                return Root;
             }
 
             internal void Write(BinaryWriterEx bw)
             {
                 bw.WriteInt32(Version);
                 bw.ReserveInt32("ParamNameOffset");
-                int count = Tree.GetNodeCount();
+                int count = Root?.GetNodeCount() ?? 0;
                 bw.WriteInt32(count + 1);
                 for (int i = 0; i < count; i++)
                 {
@@ -93,14 +97,14 @@ namespace SoulsFormats
                 bw.Pad(4);
 
                 int index = 0;
-                Tree.Write(bw, ref index);
+                Root?.Write(bw, ref index);
             }
         }
 
         /// <summary>
         /// A tree hierarchy of axis-aligned bounding boxes used in various calculations such as drawing, culling, and collision detection.
         /// </summary>
-        public class MapStudioTree : IMsbTree
+        public class MapStudioTreeNode : IMsbTreeNode
         {
             /// <summary>
             /// The bounding box for this node.
@@ -108,16 +112,18 @@ namespace SoulsFormats
             public MsbBoundingBox Bounds { get; set; }
 
             /// <summary>
-            /// The left child of this node.
+            /// The first child of this node.<br/>
+            /// Set to null when not present.
             /// </summary>
-            public MapStudioTree Left { get; set; }
-            IMsbTree IMsbTree.Left { get => Left; set => Left = (MapStudioTree)value; }
+            public MapStudioTreeNode FirstChild { get; set; }
+            IMsbTreeNode IMsbTreeNode.FirstChild { get => FirstChild; set => FirstChild = (MapStudioTreeNode)value; }
 
             /// <summary>
-            /// The right child of this node.
+            /// The next sibling of this node.<br/>
+            /// Set to null when not present.
             /// </summary>
-            public MapStudioTree Right { get; set; }
-            IMsbTree IMsbTree.Right { get => Right; set => Right = (MapStudioTree)value; }
+            public MapStudioTreeNode NextSibling { get; set; }
+            IMsbTreeNode IMsbTreeNode.NextSibling { get => NextSibling; set => NextSibling = (MapStudioTreeNode)value; }
 
             /// <summary>
             /// Indices to the parts this node contains.
@@ -125,59 +131,56 @@ namespace SoulsFormats
             public List<short> PartIndices { get; set; }
 
             /// <summary>
-            /// Create a new <see cref="MapStudioTree"/>.
+            /// Create a new <see cref="MapStudioTreeNode"/>.
             /// </summary>
-            public MapStudioTree()
+            public MapStudioTreeNode()
             {
-                PartIndices = new List<short>();
+                PartIndices = [];
                 Bounds = new MsbBoundingBox();
-                Left = null;
-                Right = null;
             }
 
             /// <summary>
-            /// Create a new <see cref="MapStudioTree"/> with the given bounding information.
+            /// Create a new <see cref="MapStudioTreeNode"/> with the given bounding information.
             /// </summary>
             /// <param name="min">The minimum extent of the bounding box.</param>
             /// <param name="max">The maximum extent of the bounding box.</param>
-            public MapStudioTree(Vector3 min, Vector3 max)
+            public MapStudioTreeNode(Vector3 min, Vector3 max)
             {
-                PartIndices = new List<short>();
+                PartIndices = [];
                 Bounds = new MsbBoundingBox(min, max);
-                Left = null;
-                Right = null;
             }
 
-            internal MapStudioTree(BinaryReaderEx br)
+            internal MapStudioTreeNode(BinaryReaderEx br)
             {
                 long start = br.Position;
                 Vector3 minimum = br.ReadVector3();
-                int leftChildOffset = br.ReadInt32();
+                int firstChildOffset = br.ReadInt32();
                 Vector3 maximum = br.ReadVector3();
                 br.AssertInt32(0); // Unknown
                 Vector3 origin = br.ReadVector3();
-                int rightChildOffset = br.ReadInt32();
+                int siblingOffset = br.ReadInt32();
                 float radius = br.ReadSingle();
                 Bounds = new MsbBoundingBox(minimum, maximum, origin, radius);
 
                 int partIndexCount = br.ReadInt32();
-
-                PartIndices = new List<short>();
+                PartIndices = new List<short>(partIndexCount);
                 for (int i = 0; i < partIndexCount; i++)
                 {
                     PartIndices.Add(br.ReadInt16());
                 }
 
-                if (leftChildOffset > 0)
+                if (firstChildOffset > 0)
                 {
-                    br.Position = start + leftChildOffset;
-                    Left = new MapStudioTree(br);
+                    br.StepIn(start + firstChildOffset);
+                    FirstChild = new MapStudioTreeNode(br);
+                    br.StepOut();
                 }
 
-                if (rightChildOffset > 0)
+                if (siblingOffset > 0)
                 {
-                    br.Position = start + rightChildOffset;
-                    Right = new MapStudioTree(br);
+                    br.StepIn(start + siblingOffset);
+                    NextSibling = new MapStudioTreeNode(br);
+                    br.StepOut();
                 }
             }
 
@@ -185,8 +188,8 @@ namespace SoulsFormats
             {
                 long start = bw.Position;
                 bw.FillInt32($"OffsetTreeNode_{index}", (int)start);
-                string fillStr1 = $"OffsetTreeNodeLeftChild_{index}";
-                string fillStr2 = $"OffsetTreeNodeRightChild_{index}";
+                string fillStr1 = $"TreeNodeFirstChild_{index}";
+                string fillStr2 = $"TreeNodeNextSibling_{index}";
 
                 bw.WriteVector3(Bounds.Min);
                 bw.ReserveInt32(fillStr1);
@@ -200,23 +203,24 @@ namespace SoulsFormats
                 {
                     bw.WriteInt16(PartIndices[i]);
                 }
+
                 bw.Pad(0x10);
                 index += 1;
 
-                if (Left != null)
+                if (FirstChild != null)
                 {
                     bw.FillInt32(fillStr1, (int)(bw.Position - start));
-                    Left.Write(bw, ref index);
+                    FirstChild.Write(bw, ref index);
                 }
                 else
                 {
                     bw.FillInt32(fillStr1, 0);
                 }
 
-                if (Right != null)
+                if (NextSibling != null)
                 {
                     bw.FillInt32(fillStr2, (int)(bw.Position - start));
-                    Right.Write(bw, ref index);
+                    NextSibling.Write(bw, ref index);
                 }
                 else
                 {
@@ -224,21 +228,17 @@ namespace SoulsFormats
                 }
             }
 
-            /// <summary>
-            /// Get the total node count starting from this node.
-            /// </summary>
-            /// <returns>The total node count.</returns>
             public int GetNodeCount()
             {
                 int count = 1;
-                if (Left != null)
+                if (FirstChild != null)
                 {
-                    count += Left.GetNodeCount();
+                    count += FirstChild.GetNodeCount();
                 }
 
-                if (Right != null)
+                if (NextSibling != null)
                 {
-                    count += Right.GetNodeCount();
+                    count += NextSibling.GetNodeCount();
                 }
 
                 return count;

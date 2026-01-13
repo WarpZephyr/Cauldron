@@ -7,7 +7,7 @@ namespace SoulsFormats
     /// <summary>
     /// A map layout file used in DeS. Extension: .msb
     /// </summary>
-    public partial class MSBD : SoulsFile<MSBD>, IMsb
+    public partial class MSBD : SoulsFile<MSBD>, IMsb, IMsbTreed
     {
         /// <summary>
         /// Model files that are available for parts to use.
@@ -34,9 +34,10 @@ namespace SoulsFormats
         IMsbParam<IMsbPart> IMsb.Parts => Parts;
 
         /// <summary>
-        /// Unknown.
+        /// A bounding volume hierarchy using Axis-Aligned Bounding Boxes for culling of some kind.
         /// </summary>
-        public List<Tree> Trees { get; set; }
+        public MapStudioTreeParam Tree { get; set; }
+        IReadOnlyList<IMsbTreeParam> IMsbTreed.Trees => [Tree];
 
         internal struct Entries
         {
@@ -55,7 +56,7 @@ namespace SoulsFormats
             Events = new EventParam();
             Regions = new PointParam();
             Parts = new PartsParam();
-            Trees = new List<Tree>();
+            Tree = new MapStudioTreeParam();
         }
 
         /// <summary>
@@ -74,8 +75,7 @@ namespace SoulsFormats
             entries.Regions = Regions.Read(br);
             Parts = new PartsParam();
             entries.Parts = Parts.Read(br);
-            var tree = new MapstudioTree();
-            Trees = tree.Read(br);
+            Tree = new MapStudioTreeParam();
 
             if (br.Position != 0)
                 throw new InvalidDataException("The next param offset of the final param should be 0, but it wasn't.");
@@ -118,20 +118,39 @@ namespace SoulsFormats
             bw.FillInt32("NextParamOffset", (int)bw.Position);
             Parts.Write(bw, entries.Parts);
             bw.FillInt32("NextParamOffset", (int)bw.Position);
-            new MapstudioTree().Write(bw, Trees);
+            Tree.Write(bw);
             bw.FillInt32("NextParamOffset", 0);
         }
 
         /// <summary>
         /// A generic group of entries in an MSB.
         /// </summary>
-        public abstract class Param<T> where T : Entry
+        public abstract class Param<T> where T : ParamEntry
         {
-            internal abstract string Name { get; }
+            /// <summary>
+            /// Unknown; probably some kind of version number.
+            /// </summary>
+            public int Version { get; set; }
+
+            /// <summary>
+            /// The Name or Type of the Param.
+            /// </summary>
+            private protected string Name { get; }
+
+            /// <summary>
+            /// Creates a Param, empty and with default values.
+            /// </summary>
+            /// <param name="version">The version of the Param.</param>
+            /// <param name="name">The name of the Param.</param>
+            internal Param(int version, string name)
+            {
+                Version = version;
+                Name = name;
+            }
 
             internal List<T> Read(BinaryReaderEx br)
             {
-                br.AssertInt32(0);
+                Version = br.AssertInt32(0);
                 int nameOffset = br.ReadInt32();
                 int offsetCount = br.ReadInt32();
                 int[] entryOffsets = br.ReadInt32s(offsetCount - 1);
@@ -153,9 +172,11 @@ namespace SoulsFormats
 
             internal abstract T ReadEntry(BinaryReaderEx br);
 
-            internal virtual void Write(BinaryWriterEx bw, List<T> entries)
+            internal virtual int[] Write(BinaryWriterEx bw, List<T> entries)
             {
-                bw.WriteInt32(0);
+                int[] entryOffsets = new int[entries.Count];
+
+                bw.WriteInt32(Version);
                 bw.ReserveInt32("ParamNameOffset");
                 bw.WriteInt32(entries.Count + 1);
                 for (int i = 0; i < entries.Count; i++)
@@ -176,10 +197,13 @@ namespace SoulsFormats
                         id = 0;
                     }
 
-                    bw.FillInt32($"EntryOffset{i}", (int)bw.Position);
+                    entryOffsets[i] = (int)bw.Position;
+                    bw.FillInt32($"EntryOffset{i}", entryOffsets[i]);
                     entries[i].Write(bw, id);
                     id++;
                 }
+
+                return entryOffsets;
             }
 
             /// <summary>
@@ -192,15 +216,25 @@ namespace SoulsFormats
             /// </summary>
             public override string ToString()
             {
-                return $"{Name}";
+                return Name;
             }
         }
 
         /// <summary>
         /// A generic entry in an MSB param.
         /// </summary>
-        public abstract class Entry
+        public abstract class ParamEntry : IMsbEntry
         {
+            /// <summary>
+            /// The name of this entry.
+            /// </summary>
+            public string Name { get; set; }
+
+            /// <summary>
+            /// Writes an entry to a stream.
+            /// </summary>
+            /// <param name="bw">The stream.</param>
+            /// <param name="id">The ID of the entry.</param>
             internal abstract void Write(BinaryWriterEx bw, int id);
         }
     }

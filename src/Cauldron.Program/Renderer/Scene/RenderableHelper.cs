@@ -286,6 +286,26 @@ public static class RenderableHelper
 
         return r;
     }
+    public static DebugPrimitiveRenderableProxy GetBoxRegionProxy(RenderScene scene, Vector3 localMin, Vector3 localMax)
+    {
+        var baseColor = CFG.Current.GFX_Renderable_Box_BaseColor;
+        var highlightColor = CFG.Current.GFX_Renderable_Box_HighlightColor;
+        var transparency = CFG.Current.GFX_Renderable_Default_Wireframe_Alpha;
+
+        var box = new DbgPrimWireBox(
+            Transform.Default,
+            localMin,
+            localMax,
+            Color.Blue);
+
+        DebugPrimitiveRenderableProxy r = new(scene.OpaqueRenderables, box);
+
+        r.BaseColor = ColorHelper.GetTransparencyColor(baseColor, transparency);
+        r.HighlightedColor = ColorHelper.GetTransparencyColor(highlightColor, transparency);
+        //ColorHelper.ApplyColorVariance(r);
+
+        return r;
+    }
     public static DebugPrimitiveRenderableProxy GetSolidBoxRegionProxy(RenderScene scene)
     {
         var baseColor = CFG.Current.GFX_Renderable_Box_BaseColor;
@@ -293,6 +313,27 @@ public static class RenderableHelper
         var transparency = CFG.Current.GFX_Renderable_Box_Alpha;
 
         DebugPrimitiveRenderableProxy r = new(scene.OpaqueRenderables, _regionSolidBox);
+
+        r.RenderOverlay = true;
+        r.BaseColor = ColorHelper.GetTransparencyColor(baseColor, transparency);
+        r.HighlightedColor = ColorHelper.GetTransparencyColor(highlightColor, transparency);
+        //ColorHelper.ApplyColorVariance(r);
+
+        return r;
+    }
+    public static DebugPrimitiveRenderableProxy GetSolidBoxRegionProxy(RenderScene scene, Vector3 localMin, Vector3 localMax)
+    {
+        var baseColor = CFG.Current.GFX_Renderable_Box_BaseColor;
+        var highlightColor = CFG.Current.GFX_Renderable_Box_HighlightColor;
+        var transparency = CFG.Current.GFX_Renderable_Box_Alpha;
+
+        var box = new DbgPrimSolidBox(
+            Transform.Default,
+            localMin,
+            localMax,
+            Color.Blue);
+
+        DebugPrimitiveRenderableProxy r = new(scene.OpaqueRenderables, box);
 
         r.RenderOverlay = true;
         r.BaseColor = ColorHelper.GetTransparencyColor(baseColor, transparency);

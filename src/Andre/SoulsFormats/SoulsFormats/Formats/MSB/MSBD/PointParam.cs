@@ -12,8 +12,6 @@ namespace SoulsFormats
         /// </summary>
         public class PointParam : Param<Region>, IMsbParam<IMsbRegion>
         {
-            internal override string Name => "POINT_PARAM_ST";
-
             /// <summary>
             /// All regions in the map.
             /// </summary>
@@ -22,7 +20,7 @@ namespace SoulsFormats
             /// <summary>
             /// Creates an empty PointParam.
             /// </summary>
-            public PointParam() : base()
+            public PointParam() : base(0, "POINT_PARAM_ST")
             {
                 Regions = new List<Region>();
             }
@@ -55,13 +53,8 @@ namespace SoulsFormats
         /// <summary>
         /// A point or volume used by scripts or events.
         /// </summary>
-        public class Region : Entry, IMsbRegion
+        public class Region : ParamEntry, IMsbRegion
         {
-            /// <summary>
-            /// The name of the region.
-            /// </summary>
-            public string Name { get; set; }
-
             /// <summary>
             /// Describes the physical shape of the region.
             /// </summary>

@@ -75,6 +75,15 @@ public class MapEntityTypeCache
             mapcache.Add(MsbEntityType.Layer, new Dictionary<Type, List<MsbEntity>>());
         }
 
+        // MapStudioTree
+        if (Editor.Project.ProjectType is ProjectType.AC4
+             or ProjectType.ACFA
+             or ProjectType.ACV
+             or ProjectType.ACVD)
+        {
+            mapcache.Add(MsbEntityType.MapStudioTree, new Dictionary<Type, List<MsbEntity>>());
+        }
+
         // External: BTL
         if (Editor.Project.ProjectType is ProjectType.BB
             or ProjectType.DS3

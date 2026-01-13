@@ -149,6 +149,10 @@ public struct Transform
         ? OverrideMatrixWorld
         : ScaleMatrix * RotationMatrix * TranslationMatrix;
 
+    public Matrix4x4 ScalelessWorldMatrix
+        => RotationMatrix * TranslationMatrix;
+
+
     public Vector3 Look => Vector3.Transform(Vector3.UnitZ, WorldMatrix);
     public Vector3 Up => Vector3.Transform(Vector3.UnitY, Rotation);
 

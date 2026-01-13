@@ -54,12 +54,12 @@ namespace SoulsFormats
     /// <summary>
     /// A generic map layout file with a number of tree bounding volume hierarchies.
     /// </summary>
-    public interface IMsbBound<TTree> : IMsb where TTree : IMsbTree
+    public interface IMsbTreed
     {
         /// <summary>
         /// Tree bounding volume hierarchies used in various calculations.
         /// </summary>
-        IReadOnlyList<IMsbTreeParam<TTree>> Trees { get; }
+        IReadOnlyList<IMsbTreeParam> Trees { get; }
     }
 
     /// <summary>
@@ -78,16 +78,13 @@ namespace SoulsFormats
         IReadOnlyList<T> GetEntries();
     }
 
-	/// <summary>
-    /// A MapStudioTree containing a tree bounding volume hierarchy.
-    /// </summary>
-    public interface IMsbTreeParam<TTree> where TTree : IMsbTree
+    public interface IMsbTreeParam
     {
         /// <summary>
-        /// The axis-aligned tree bounding volume hierarchy.<br/>
-        /// Set to null when not calculated yet.
+        /// The axis-aligned tree bounding volume hierarchy root node.<br/>
+        /// Set to null when not present.
         /// </summary>
-        public TTree Tree { get; set; }
+        public IMsbTreeNode Root { get; set; }
     }
 
     /// <summary>
@@ -220,7 +217,7 @@ namespace SoulsFormats
     /// <summary>
     /// A tree hierarchy of axis-aligned bounding boxes used in various calculations such as drawing, culling, and collision detection.
     /// </summary>
-    public interface IMsbTree
+    public interface IMsbTreeNode
     {
         /// <summary>
         /// The bounding box for this node.
@@ -228,14 +225,16 @@ namespace SoulsFormats
         public MsbBoundingBox Bounds { get; set; }
 
         /// <summary>
-        /// The left child of this node.
+        /// The first child of this node.<br/>
+        /// Set to null when not present.
         /// </summary>
-        public IMsbTree Left { get; set; }
+        public IMsbTreeNode FirstChild { get; set; }
 
         /// <summary>
-        /// The right child of this node.
+        /// The next sibling of this node.<br/>
+        /// Set to null when not present.
         /// </summary>
-        public IMsbTree Right { get; set; }
+        public IMsbTreeNode NextSibling { get; set; }
 
         /// <summary>
         /// Indices to the parts this node contains.

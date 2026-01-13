@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace SoulsFormats
 {
-    public partial class MSBV
+    public partial class MSBD
     {
         /// <summary>
         /// A bounding-volume hierarchy used in calculations such as drawing and collision.

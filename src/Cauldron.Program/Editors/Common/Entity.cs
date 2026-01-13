@@ -704,13 +704,13 @@ public class Entity : ISelectable, IDisposable
                     {
                         string[] array;
                         var value = p.GetValue(WrappedObject);
-                        if (p.PropertyType.IsArray)
+                        if (value is string[] vStrArray)
                         {
-                            array = (string[])value;
+                            array = vStrArray;
                         }
-                        else if (value is IEnumerable<string> list)
+                        else if (value is IEnumerable<string> vStrEnumerable)
                         {
-                            array = list.ToArray();
+                            array = vStrEnumerable.ToArray();
                         }
                         else
                         {
@@ -1029,7 +1029,17 @@ public class Entity : ISelectable, IDisposable
         {
             if (p.HasTransform)
             {
-                t *= p.UseTempTransform ? p.TempTransform.WorldMatrix : p.GetLocalTransform().WorldMatrix;
+                Matrix4x4 pT;
+                if (p.UseTempTransform)
+                {
+                    pT = p.TempTransform.WorldMatrix;
+                }
+                else
+                {
+                    pT = p.GetLocalTransform().WorldMatrix;
+                }
+
+                t *= pT;
             }
 
             p = p.Parent;
@@ -2064,6 +2074,15 @@ public class MsbEntity : Entity
                 }
 
                 _renderSceneMesh = DrawableHelper.GetAutoInvadeDrawable(universe.RenderScene, ContainingMap, this, EntityRenderType);
+            }
+            else if (Type == MsbEntityType.MapStudioTree && _renderSceneMesh == null)
+            {
+                if (_renderSceneMesh != null)
+                {
+                    _renderSceneMesh.Dispose();
+                }
+
+                _renderSceneMesh = DrawableHelper.GetMapStudioTreeNodeDrawable(universe.RenderScene, ContainingMap, this, EntityRenderType);
             }
             else
             {

@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Veldrid;
-using static Google.Protobuf.Reflection.FieldOptions.Types;
-using static StudioCore.Editors.MapEditor.MsbUtils;
 
 namespace StudioCore.Editors.MapEditor;
 

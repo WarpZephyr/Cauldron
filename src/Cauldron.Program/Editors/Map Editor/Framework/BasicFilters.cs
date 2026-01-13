@@ -120,6 +120,18 @@ public class BasicFilters
             UIHelper.Tooltip($"Toggle the display of map objects classified as 'Light Probes'.");
         }
 
+        // MapStudioTree
+        if (Editor.Project.ProjectType is ProjectType.AC4 or ProjectType.ACFA or ProjectType.ACV or ProjectType.ACVD)
+        {
+            if (ImGui.MenuItem("MapStudioTrees"))
+            {
+                RenderScene.ToggleDrawFilter(RenderFilter.MapStudioTree);
+            }
+            ticked = RenderScene.DrawFilter.HasFlag(RenderFilter.MapStudioTree);
+            UIHelper.ShowActiveStatus(ticked);
+            UIHelper.Tooltip($"Toggle the display of map objects classified as 'MapStudioTrees'.");
+        }
+
         // Debug
         //if (ImGui.MenuItem("Debug"))
         //{

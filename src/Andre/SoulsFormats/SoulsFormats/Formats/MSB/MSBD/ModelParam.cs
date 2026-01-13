@@ -24,8 +24,6 @@ namespace SoulsFormats
         /// </summary>
         public class ModelParam : Param<Model>, IMsbParam<IMsbModel>
         {
-            internal override string Name => "MODEL_PARAM_ST";
-
             /// <summary>
             /// Models for fixed terrain and scenery.
             /// </summary>
@@ -69,7 +67,7 @@ namespace SoulsFormats
             /// <summary>
             /// Creates an empty ModelParam.
             /// </summary>
-            public ModelParam() : base()
+            public ModelParam() : base(0, "MODEL_PARAM_ST")
             {
                 MapPieces = new List<Model.MapPiece>();
                 Objects = new List<Model.Object>();
@@ -153,14 +151,9 @@ namespace SoulsFormats
         /// <summary>
         /// A model file available for parts to reference.
         /// </summary>
-        public abstract class Model : Entry, IMsbModel
+        public abstract class Model : ParamEntry, IMsbModel
         {
             private protected abstract ModelType Type { get; }
-
-            /// <summary>
-            /// The name of the model.
-            /// </summary>
-            public string Name { get; set; }
 
             /// <summary>
             /// A path to a .sib file, presumed to be some kind of editor placeholder.

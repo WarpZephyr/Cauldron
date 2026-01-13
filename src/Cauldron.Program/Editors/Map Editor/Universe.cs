@@ -475,10 +475,9 @@ public class Universe
                 {
                     var prev = MSBD.Read(mapData);
                     MSBD n = new();
-                    n.Trees = prev.Trees;
+                    n.Tree = prev.Tree;
                     msb = n;
                 }
-                //TODO ACFA
                 else if (Editor.Project.ProjectType == ProjectType.ACFA)
                 {
                     MSBFA prev = MSBFA.Read(mapData);
@@ -490,6 +489,8 @@ public class Universe
                     n.Routes = prev.Routes;
                     n.DrawingTree = prev.DrawingTree;
                     n.CollisionTree = prev.CollisionTree;
+                    n.Tree3 = prev.Tree3;
+                    n.Tree4 = prev.Tree4;
                     msb = n;
                 }
                 else if (Editor.Project.ProjectType == ProjectType.ACV)

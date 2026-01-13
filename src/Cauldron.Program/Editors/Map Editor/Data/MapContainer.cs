@@ -1,4 +1,5 @@
 ﻿using Andre.Formats;
+using HKX2;
 using SoulsFormats;
 using StudioCore.Application;
 using StudioCore.Editors.Common;
@@ -10,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Xml.Serialization;
+using Veldrid.Utilities;
+using static DotNext.Generic.BooleanConst;
 
 namespace StudioCore.Editors.MapEditor;
 
@@ -51,6 +54,8 @@ public class MapContainer : ObjectContainer
     public List<Entity> Layers;
     public List<Entity> Routes;
 
+    public List<Entity> MapStudioTrees;
+
     [XmlIgnore]
     public LightAtlasResolver LightAtlasResolver;
 
@@ -72,6 +77,8 @@ public class MapContainer : ObjectContainer
         Models = new();
         Layers = new();
         Routes = new();
+
+        MapStudioTrees = [];
 
         var t = new MapTransformNode(mapid);
         RootObject = new MsbEntity(Editor, this, t, MsbEntityType.MapRoot);
@@ -189,6 +196,33 @@ public class MapContainer : ObjectContainer
                 Layers.Add(n);
                 Objects.Add(n);
                 RootObject.AddChild(n);
+            }
+        }
+
+        if (msb is IMsbTreed msbTreed)
+        {
+            void AddTree(IMsbTreeNode node, Entity parentEntity)
+            {
+                if (node == null)
+                    return;
+
+                var n = new MsbEntity(Editor, this, node, MsbEntityType.MapStudioTree);
+                parentEntity.AddChild(n);
+                Objects.Add(n);
+                AddTree(node.FirstChild, n);
+                AddTree(node.NextSibling, parentEntity);
+            }
+
+            if (msbTreed.Trees.Count > 0 && msbTreed.Trees[0] != null && msbTreed.Trees[0].Root != null)
+            {
+                var node = msbTreed.Trees[0].Root;
+                var n = new MsbEntity(Editor, this, node, MsbEntityType.MapStudioTree);
+
+                MapStudioTrees.Add(n);
+                Objects.Add(n);
+                RootObject.AddChild(n);
+                AddTree(node.FirstChild, n);
+                AddTree(node.NextSibling, RootObject);
             }
         }
 
@@ -456,21 +490,21 @@ public class MapContainer : ObjectContainer
         IMsbModel model = null;
         if (Editor.Project.ProjectType is ProjectType.ACFA)
         {
-            model = CreateModelACFA(name);
+            model = CreateMsbModelACFA(name);
         }
         else if (Editor.Project.ProjectType is ProjectType.ACV)
         {
-            model = CreateModelACV(name);
+            model = CreateMsbModelACV(name);
         }
         else if (Editor.Project.ProjectType is ProjectType.ACVD)
         {
-            model = CreateModelACVD(name);
+            model = CreateMsbModelACVD(name);
         }
 
         return model;
     }
 
-    private static MSBFA.Model CreateModelACFA(string name)
+    private static MSBFA.Model CreateMsbModelACFA(string name)
     {
         MSBFA.Model model;
 
@@ -514,7 +548,7 @@ public class MapContainer : ObjectContainer
         return model;
     }
 
-    private static MSBV.Model CreateModelACV(string name)
+    private static MSBV.Model CreateMsbModelACV(string name)
     {
         MSBV.Model model;
 
@@ -558,7 +592,7 @@ public class MapContainer : ObjectContainer
         return model;
     }
 
-    private static MSBVD.Model CreateModelACVD(string name)
+    private static MSBVD.Model CreateMsbModelACVD(string name)
     {
         MSBVD.Model model;
 
@@ -602,8 +636,27 @@ public class MapContainer : ObjectContainer
         return model;
     }
 
+    private IMsbTreeNode CreateMapStudioTreeNode()
+    {
+        if (Editor.Project.ProjectType is ProjectType.ACFA)
+        {
+            return new MSBFA.MapStudioTreeNode();
+        }
+        else if (Editor.Project.ProjectType is ProjectType.ACV)
+        {
+            return new MSBV.MapStudioTreeNode();
+        }
+        else if (Editor.Project.ProjectType is ProjectType.ACVD)
+        {
+            return new MSBVD.MapStudioTreeNode();
+        }
+
+        throw new NotSupportedException();
+    } 
+
     public void SerializeToMSB(IMsb msb, ProjectType game)
     {
+        var boundsDict = new Dictionary<string, BoundingBox>();
         foreach (Entity m in Objects)
         {
             if (m.WrappedObject != null && m.WrappedObject is IMsbModel mo)
@@ -613,9 +666,18 @@ public class MapContainer : ObjectContainer
             else if (m.WrappedObject != null && m.WrappedObject is IMsbPart p)
             {
                 msb.Parts.Add(p);
-                if (m is MsbEntity me && !me.HasModel())
+               
+                if (m is MsbEntity me)
                 {
-                    AddModel(msb, Name);
+                    if (!(me.Name.StartsWith('e')) && !(me.Name.StartsWith('a')))
+                    {
+                        boundsDict.TryAdd(m.Name, m.GetBounds());
+                    }
+
+                    if (!me.HasModel())
+                    {
+                        AddModel(msb, m.CurrentModelName);
+                    }
                 }
             }
             else if (m.WrappedObject != null && m.WrappedObject is IMsbRegion r)
@@ -633,6 +695,38 @@ public class MapContainer : ObjectContainer
             else if (msb is IMsbLayered msbLayered && m.WrappedObject != null && m.WrappedObject is IMsbLayer l)
             {
                 msbLayered.Layers.Add(l);
+            }
+        }
+
+        if (msb is IMsbTreed msbTreed)
+        {
+            var parts = msb.Parts.GetEntries();
+            var partInfo = new List<PartInfo>();
+
+            short index = 0;
+            foreach (var part in parts)
+            {
+                if (part.Name.StartsWith('e') || part.Name.StartsWith('a'))
+                {
+                    index++;
+                    continue;
+                }
+
+                partInfo.Add(new PartInfo(boundsDict[part.Name], index++));
+            }
+
+            var mst = new MapStudioTree();
+            mst.BuildBottomUp(partInfo);
+            var rootNode = mst.Root.ToMsbTreeNode(CreateMapStudioTreeNode);
+
+            if (msbTreed.Trees.Count > 0)
+            {
+                msbTreed.Trees[0].Root = rootNode;
+            }
+
+            if (msbTreed.Trees.Count > 1)
+            {
+                msbTreed.Trees[1].Root = rootNode;
             }
         }
     }

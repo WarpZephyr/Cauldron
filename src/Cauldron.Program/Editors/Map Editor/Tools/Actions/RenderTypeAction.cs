@@ -34,9 +34,9 @@ public class RenderTypeAction
     /// </summary>
     public void OnContext(Entity ent)
     {
-        if (ent.WrappedObject is IMsbPart or IMsbRegion)
+        if (ent.WrappedObject is IMsbPart or IMsbRegion or IMsbTreeNode)
         {
-            if (ent.WrappedObject is IMsbRegion or BTL.Light)
+            if (ent.WrappedObject is IMsbRegion or IMsbTreeNode or BTL.Light)
             {
                 if (ImGui.Selectable("Toggle Render Type"))
                 {
@@ -85,7 +85,7 @@ public class RenderTypeAction
                 var mEnt = (MsbEntity)ent;
 
                 if (!mEnt.IsSwitchingRenderType &&
-                    (mEnt.Type is MsbEntityType.Region || mEnt.Type is MsbEntityType.Light))
+                    (mEnt.Type is MsbEntityType.Region || mEnt.Type is MsbEntityType.Light || mEnt.Type is MsbEntityType.MapStudioTree))
                 {
                     mEnt.SwitchRenderType();
                 }
